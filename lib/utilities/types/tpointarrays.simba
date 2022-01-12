@@ -11,6 +11,23 @@ The source for this file can be found `here <https://github.com/SRL/SRL-6/blob/m
 {$f-}
 
 (*
+TPointArray.Bounds
+~~~~~~~~~~~~~~~~~~~
+.. code-block:: pascal
+
+    function TPointArray.Bounds(): TBox; constref;
+
+Wraps Simba's GetTPABounds
+*)
+function TPointArray.Bounds(): TBox; constref;
+begin
+  if Length(Self) = 1 then
+    Exit(TBox([Self[0].x, Self[0].y, Self[0].x, Self[0].y]));
+
+  Result := GetTPABounds(Self);
+end;
+
+(*
 TPointArray.copy
 ~~~~~~~~~~~~~~~~
 
@@ -616,30 +633,26 @@ begin
   result := returnPointsNotInTPA(self, b);
 end;
 
-(*
-TPointArray.offset
-~~~~~~~~~~~~~~~~~~
 
+(*
+TPointArray.Offset
+~~~~~~~~~~~~~~~~~~~
 .. code-block:: pascal
 
-    procedure TPointArray.offset(p: TPoint);
+    function TPointArray.Offset(off: TPoint): TPointArray;
 
-Offsets each point in the TPointArray by the point p.
-
-.. note::
-
-    - by Coh3n
-
-Example:
-
-..code-block:: pascal
-
-    TPA.offset(point(5, 5));
-
+Wraps Simba's `OffsetTPA`
 *)
-procedure TPointArray.offset(p: TPoint);
+function TPointArray.Offset(X, Y: Int32): TPointArray; constref; overload;
 begin
-  offsetTPA(self, p);
+  Result := CopyTPA(Self);
+
+  OffsetTPA(Result, [X, Y]);
+end;
+
+function TPointArray.Offset(off: TPoint): TPointArray; constref; overload;
+begin
+  Result := Offset(Off.X, Off.Y);
 end;
 
 (*

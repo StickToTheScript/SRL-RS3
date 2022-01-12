@@ -70,6 +70,8 @@ var
 {$include_once lib/core/players.simba}
 {$include_once lib/core/client.simba}
 {$include_once lib/misc/antiban.simba}
+{$include_once lib/core/sps.simba}
+{$include_once lib/misc/itemfinder/itemfinder.simba}
 
 {$f+}
 

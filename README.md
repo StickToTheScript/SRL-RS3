@@ -16,7 +16,9 @@ In order to start using this library:
 > All required plugins are included in the repo already.
 
 ## Troubleshooting
-### Duplicate declaration "Tesseract_Create"
+### `Duplicate declaration "Tesseract_Create"`
 When attempting to compile or run a script and you encounter `Duplicate declaration "Tesseract_Create"`, simply remove any instance of `{$i Tesseract/Tesseract.simba}` from your script. 
 
 This is because `Tesseract.simba` is already included in the library.
+
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FStickToTheScript%2FSRL-RS3&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
