@@ -1,0 +1,80 @@
+const
+  ValidChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function Base32Decode(const source: String): String;
+var
+  UpperSource: String;
+  p, i, l, n, j: Integer;
+begin
+  UpperSource := UpperCase(source);
+
+  l := Length(UpperSource);
+  n := 0; j := 0;
+  Result := '';
+
+  for i := 1 to l do
+  begin
+    n := n shl 5;                 // Move buffer left by 5 to make room
+
+    p := Pos(UpperSource[i], ValidChars);
+    if p >= 0 then
+    begin
+      n := n + (p - 1);         // Add value into buffer
+
+      j := j + 5;                // Keep track of number of bits in buffer
+    end;
+
+    if (j >= 8) then
+    begin
+      j := j - 8;
+      Result := Result + chr((n AND ($FF shl j)) shr j);
+    end;
+  end;
+end;
+
+function magic(i: Int64): String;
+var
+  tRes : String;
+  j : Integer;
+begin
+  SetLength(Result, SizeOf(Int64));
+  MemMove(i, Result[1], SizeOf(Int64));
+
+  tRes := Result;
+  for j := 1 to length(result) do
+    result[high(tRes) - j + 1] := tRes[j];
+end;
+
+function CalculateOTP(const S : String): String;
+var
+  BinSecret: String;
+  Hash: String;
+  Offset: Integer;
+  Part1, Part2, Part3, Part4: Integer;
+  Key: Integer;
+begin
+  Offset := (StrToInt('$' + S[39]+S[40]) AND $0F)*2;
+  Part1 := (StrToInt('$' + S[offset+1]+S[offset+2]) AND $7F);
+  Part2 := (StrToInt('$' + S[offset+3]+S[offset+4]) AND $FF);
+  Part3 := (StrToInt('$' + S[offset+5]+S[offset+6]) AND $FF);
+  Part4 := (StrToInt('$' + S[offset+7]+S[offset+8]) AND $FF);
+
+  Key := (Part1 shl 24) OR (Part2 shl 16) OR (Part3 shl 8) OR (Part4);
+  Result := toStr(Key mod trunc(10**6));
+  while length(Result) < 6 do
+    insert('0', result, 0);
+end;
+
+function getOTPNow(secret : String) : String;
+var
+  byteSecret, timeSecret : String;
+  timecode : Int64;
+begin
+  timecode := trunc(DateTimeToUnix(Now, False) / 30);
+  writeln timecode;
+  byteSecret := base32Decode(secret);
+  timeSecret := magic(timeCode);
+
+  result := calculateOTP(HMACSHA1(byteSecret, timeSecret));
+  print('getOTPNow: Got ' + result);
+end;

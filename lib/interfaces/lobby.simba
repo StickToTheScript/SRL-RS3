@@ -1,0 +1,610 @@
+(*
+Lobby
+=====
+
+The lobby file holds functions and procedures that are used in the runescape lobby.
+
+The source for this file can be found `here <https://github.com/SRL/SRL-6/blob/master/lib/interfaces/lobby/lobby.simba>`_.
+
+*)
+
+{$f-}
+
+(*
+Consts, Types, Vars
+~~~~~~~~~~~~~~~~~~~
+
+The following constants, types and variables are used throughout the lobby methods.
+
+**const Lobby Tabs**
+
+Constants that represent the different lobby tabs.
+
+    * LOBBY_PLAYER
+    * LOBBY_WORLDS
+    * LOBBY_FRIENDS
+    * LOBBY_CHAT
+    * LOBBY_CLAN
+    * LOBBY_OPTIONS
+
+*)
+const
+  LOBBY_PLAYER = 0;
+  LOBBY_WORLDS = 1;
+  LOBBY_FRIENDS = 2;
+  LOBBY_CHAT = 3;
+  LOBBY_CLAN = 4;
+  LOBBY_OPTIONS = 5;
+
+(*
+**type TRSLobby**
+
+.. code-block:: pascal
+
+    type
+      TRSLobby = type TRSInterface;
+
+A type that stores the lobby interface properties.
+
+*)
+type
+  TRSLobby = record(TRSInterface)
+    tabBoxes: TBoxArray;
+ end;
+
+(*
+**var lobby**
+
+.. code-block:: pascal
+
+    var
+      lobby: TRSLobby;
+
+A variable through which scripters can access the TRSLobby type methods.
+
+*)
+var
+  lobby: TRSLobby;
+
+(*
+TRSLobby methods
+~~~~~~~~~~~~~~~~
+
+The following methods should be called through the **lobby** variable.
+
+Example:
+
+.. code-block:: pascal
+
+    if lobby.isOpen() then
+      writeln('It''s open');
+*)
+
+
+{*
+TRSLobby.__init()
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TRSLobby.__init();
+
+Initializes the TRSLobby.
+
+.. note::
+
+    - by Coh3n
+    - Last updated: 23 July 2013 by Coh3n
+
+Example:
+
+.. code-block:: pascal
+
+    lobby.__init();
+*}
+{$IFNDEF CODEINSIGHT}
+procedure TRSLobby.__init();
+begin
+  with (Self) do
+  begin
+    name := 'RS Lobby';
+    ID := ID_INTERFACE_LOBBY;
+    parentID := -1;
+    isStatic := true;
+    setBounds([21, 110, 782, 587]);
+    tabBoxes := grid(6, 1, 45, 22, 100, 0, point(x1 + 70, y1 + 16));
+  end;
+end;
+{$ENDIF}
+
+{*
+__skipEmailScreen
+-----------------
+
+.. code-block:: pascal
+
+    procedure TRSLobby.__skipEmailScreen();
+
+Closes the 'validate email screen' that appears when you enter the lobby.
+
+.. note::
+
+    - by NCDS & Coh3n
+    - Last updated: 22 August 2014 by Olly
+
+Example:
+
+.. code-block:: pascal
+
+    lobby.__skipEmailScreen();
+*}
+{$IFNDEF CODEINSIGHT}
+procedure TRSLobby.__skipEmailScreen();
+var
+  TPA: TPointArray;
+  b: TBox;
+begin
+  FindColorsTolerance(TPA, 14197278, GetClientBounds(), 60, ColorSetting(1));
+
+  if (Length(TPA) > 200) and (CountColor(1, GetClientBounds()) > 10000) then
+  begin
+    b := GetTPABounds(TPA);
+    if inRange(b.getWidth(), 70, 90) then
+    begin
+      MouseBox(b, MOUSE_LEFT);
+      Wait(Random(1000, 2000));
+      print('TRSLobby.__skipEmailScreen(): Closed the validate email screen', TDebug.SUB);
+    end;
+  end;
+end;
+{$ENDIF}
+
+function TRSLobby.__findLobby(): boolean;
+var
+  i: integer;
+  b, playBox: TBox;
+  TPA, playTPA: TPointArray;
+  ATPA: T2DPointArray;
+begin
+  //if findColorsTolerance(TPA, 1644867, getClientBounds(), 22) then // Red Lobby in corner
+  if findColorsTolerance(TPA, 2204397, getClientBounds(), 27, [2, [0.10, 0.57]]) then // Yellow Play Button
+  begin
+    ATPA := TPA.cluster(1);
+    ATPA.sortBySize();
+    for i := 0 to high(ATPA) do
+    begin
+      //writeln(ATPA[i].getBounds().getWidth());
+      if inRange(ATPA[i].getBounds().getWidth(), 170, 240) then
+      begin
+        if findColorsTolerance(playTPA, 65536, ATPA[i].getBounds(), 1) then
+        begin
+          //writeln(playTPA.getbounds());
+          playBox := playTPA.getbounds();
+          playBox.edit(-4,-4,4,4);
+          //writeln(tesseractOCR.Recognize(playBox, -50));
+          if pos('play', lowercase(tesseractOCR.Recognize(playBox, -50))) then
+          begin // We found the play now button
+            print('TRSLobby.__findLobby(): Found the Play Button.', TDebug.SUB);
+            writeln(playBox);
+
+            b := playBox;
+            b.edit(-300,-466,327,15);
+            writeln(b);
+            self.tabBoxes := grid(6, 1, 45, 22, 100, 0, point(b.x1 - 15, b.y1 + 108));
+
+            //b.edit(-2, 23, 691, 543);
+            self.setbounds(b);
+            //writeln(b);
+            exit(true);
+          end;
+        end else
+          print('TRSLobby.__findLobby(): Did not find black text in ATPA.', TDebug.WARNING);
+      end;
+    end;
+  end;
+  {if findColorsTolerance(TPA, 1644867, getClientBounds(), 22) then // Red Lobby in corner
+  begin
+    ATPA := TPA.cluster(1);
+    ATPA.sortBySize();
+    for i := 0 to high(ATPA) do
+    if inRange(length(ATPA[i]), 1200, 2000) then
+    begin
+      b := ATPA[i].getbounds();
+      writeln(b);
+      if inRange(b.getWidth(), 90, 110) and inRange(b.getHeight(), 22, 34) then
+      begin
+        print('TRSLobby.__findLobby(): Found the Lobby-banner.', TDebug.SUB);
+        self.tabBoxes := grid(6, 1, 45, 22, 100, 0, point(b.x1 - 15, b.y1 + 108));
+
+        b.edit(-2, 23, 691, 543);
+        self.setbounds(b);
+        writeln(b);
+        exit(true);
+      end;
+    end;
+  end; }
+end;
+
+
+(*
+isOpen
+------
+
+.. code-block:: pascal
+
+    function TRSLobby.isOpen(): boolean;
+
+Returns true if the lobby is open.
+
+.. note::
+
+    - by Coh3n
+    - Last Updated: 29 July 2014 by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+    if lobby.isOpen() then
+      writeLn('The lobby is open');
+*)
+function TRSLobby.isOpen(): boolean;
+var
+  t: TCountDown;
+begin
+  t.setTime(randomRange(800, 1200));
+  print('TRSLobby.isOpen(): checking if the lobby is open', TDebug.HEADER);
+  repeat
+    result := self.__findLobby();
+
+    if (not result) then
+      wait(randomRange(40, 100));
+
+  until result or t.isFinished();
+  print('TRSLobby.isOpen(): ' + toStr(result), TDebug.FOOTER);
+end;
+
+(*
+findPlayButton
+--------------
+
+.. code-block:: pascal
+
+    function findPlayButton(var res: TPoint): boolean;
+
+Returns true if the play button is found somewhere on the client, and passes its
+midpoint to **res** .
+
+.. note::
+
+    - by Coh3n & Olly
+    - Last updated: 8 February 2015 by The Mayor
+
+Example:
+
+.. code-block:: pascal
+
+    lobby.findPlayButton(p);
+*)
+function TRSLobby.findPlayButton(var b: TBox): boolean;
+var
+  tpa: TPointArray;
+  atpa: T2DPointArray;
+  i: integer;
+  //ButtonColor: TColorData := [5421297, 16, [2, [0.18, 1.02]]];
+  ButtonColor: TColorData := [3320303, 23, [2, [0.11, 0.66]]];
+begin
+  print('TRSLobby.findPlayButton()', TDebug.HEADER);
+  if ButtonColor.gatherIn(TPA, getClientBounds()) then
+  begin
+    atpa := tpa.cluster(30, 10);
+    ATPA.sortBySize();
+
+    for i := 0 to high(atpa) do
+      begin
+        //writeln(length(ATPA[i]));
+        if (length(ATPA[i]) < 1000) then
+          break;    //break only works because APTA has been sorted before this loop
+        b := atpa[i].getBounds();
+
+        if inRange(b.getWidth(), 170, 250) then
+        begin
+          result := true;
+          break;
+        end;
+      end;
+  end;
+
+  print('TRSLobby.findPlayButton(): result = ' + boolToStr(result), TDebug.FOOTER);
+end;
+
+(*
+getCurrentTab
+-------------
+
+.. code-block:: pascal
+
+    function TRSLobby.getCurrentTab: integer;
+
+Returns the current lobby tab number
+
+.. note::
+
+    - by Bionicle1800, NCDS & Cohen
+    - Last Updated: 9 September  2014 by The Mayor
+
+Example:
+
+.. code-block:: pascal
+
+    if (lobby.getCurrentTab() = LOBBY_WORLDS) then
+      writeln('The world list is open!');
+
+*)
+function TRSLobby.getCurrentTab(): Integer;
+const
+  INACTIVE_TAB_BOTTOM = 8881013; // Bottom line of inactive tab
+begin
+  result := -1;
+
+  if (not self.isOpen()) then
+    exit();
+
+  for result := 0 to high(self.tabBoxes) do
+    if not (getColor(self.tabBoxes[result].x2, self.tabBoxes[result].y2) = INACTIVE_TAB_BOTTOM) then
+    begin
+      printf('TRSLobby.getCurrentTab(): Current tab is %d', [result]);
+      break();
+    end;
+
+end;
+
+{*
+_open
+-----
+
+.. code-block:: pascal
+
+    function TRSLobby._open(): boolean;
+
+Returns true if it exits from the game to the lobby screen. Scripters should
+call players[currentPlayer].exitToLobby() instead of this function.
+
+.. note::
+
+    - by Starblaster100, Raymond, IceFire908, Tarajunky, & Coh3n
+    - Last Updated: 23 July 2013 by Co3n
+
+Example:
+
+.. code-block:: pascal
+
+    if lobby._open() then
+      writeln('We''ve exited to the lobby!');
+*}
+function TRSLobby._open(): boolean;
+var
+  t: LongWord;
+begin
+  if lobby.isOpen() then
+    exit(true);
+
+  if options.open() then
+  begin
+    options.selectOption(['Lobby','xit to', 'obby']);
+
+    t := (getSystemTime() + (7000));
+
+    while (not result) and (getSystemTime() < t) do
+    begin
+      print('Waiting for lobby screen...', TDebug.SUB);
+      result := lobby.isOpen();
+      wait(700 + random(300));
+    end;
+  end;
+end;
+
+(*
+openTab
+-------
+
+.. code-block:: pascal
+
+    function TRSLobby.openTab(tab: integer): boolean;
+
+Opens the lobby tab **tab** . The tab constants are located at the top of this
+page.
+
+.. note::
+
+    - by Olly
+    - Last Updated: 22nd August 2014 by Olly
+
+Example:
+
+.. code-block:: pascal
+
+    if lobby.openTab(LOBBY_WORLDS) then
+      writeLn('We opened the worlds tab!');
+
+*)
+function TRSLobby.openTab(const tab: Integer): Boolean;
+var
+  Timeout: UInt64;
+  p: TPoint;
+begin
+  if (not self.isOpen()) then
+    exit(false);
+
+  if (self.getCurrentTab() = tab) then
+    exit(true);
+
+  p := MiddleBox(Self.tabBoxes[tab]).randRange(-9, 9, -7, 7);
+
+  Mouse(p, MOUSE_LEFT);
+  Timeout := (GetTickCount() + Random(4000, 5000));
+
+  while (not Result) and (Timeout > GetTickCount()) do
+  begin
+    Result := (Self.getCurrentTab() = tab);
+    Wait(Random(300, 600));
+  end;
+
+  print('TRSLobby.openTab(): Result = ' + BoolToStr(Result));
+end;
+
+function TRSLobby._confirmLogout() : Boolean;
+//CTS2(14392342, 26, 0.09, 0.70)
+var
+  tpa: TPointArray;
+  atpa: T2DPointArray;
+  b : tbox;
+  i: integer;
+  ButtonColor: TColorData := [14392342, 26, [2, [0.09, 0.70]]];
+begin
+  print('TRSLobby._ConfirmLogout()', TDebug.HEADER);
+  if ButtonColor.gatherIn(TPA, getClientBounds()) then
+  begin
+    atpa := tpa.cluster(3);
+    ATPA.sortBySize();
+
+    for i := 0 to high(atpa) do
+      begin
+        //writeln(length(ATPA[i]));
+        if (length(ATPA[i]) < 1000) then
+          break;    //break only works because APTA has been sorted before this loop
+        b := atpa[i].getBounds();
+
+        if inRange(b.getWidth(), 250, 300) then
+        begin
+          mouseBox(b, MOUSE_LEFT);
+          result := true;
+          break;
+        end;
+      end;
+  end;
+
+  print('TRSLobby._ConfirmLogout(): result = ' + boolToStr(result), TDebug.FOOTER);
+end;
+
+{*
+TRSLobby._leave()
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TRSLobby._leave(): boolean;
+
+Returns true if it returns to the login screen from the lobby.
+
+.. note::
+
+    - by IceFire908 & Coh3n
+    - Last Updated: 29th July by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+    lobby._leave();
+
+*}
+function TRSLobby._leave(): boolean;
+var
+  t: LongWord;
+  exitButton: TPoint;
+begin
+  result := (not self.isOpen());
+
+  t := (getSystemTime() + 30000);
+  exitButton := point(self.x2 - 7, self.y1 - 16).rand(3);
+
+  while (not result) and (getSystemTime() < t) do
+  begin
+    mouse(exitButton, MOUSE_LEFT);
+    wait(randomRange(600,1200));
+    self._confirmLogout();
+    print('Waiting for login screen...', TDebug.SUB);
+    wait(randomRange(500, 1000));
+    result := (not lobby.isOpen());
+  end;
+end;
+
+(*
+quickSelectWorld
+----------------
+
+.. code-block:: pascal
+
+    function TRSLobby.quickSelectWorld(wo: integer; click: boolean = true): boolean;
+
+Returns true if the desired world **wo** appears in the quick select favorites boxes
+in the bottom right corner of the interface. If found, it will click the world if
+**click** is set to true *(default = true)*
+
+.. note::
+
+    - by Coh3n
+    - Last Updated: 10 October 2014 by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+    if (not lobby.isOpen()) then
+      lobby.open();
+*)
+function TRSLobby.quickSelectWorld(const World: Integer; click: boolean = true): boolean;
+var
+  Boxes: TBoxArray;
+  fWorlds: array [0..2] of Integer;        //Note this should be moved to worlds.simba probably
+  i, tab: Integer;
+begin
+  if (not self.isOpen()) then
+    exit();
+
+  // quick select only shows on player info, friends, or friend chat.
+  tab := self.getCurrentTab();
+
+  getclientdimensions(w, h);
+  case tab of
+    LOBBY_PLAYER, LOBBY_FRIENDS..LOBBY_CLAN: boxes := grid(3, 1, 37, 16, 62, 0, point(self.x2 - 192, self.y2 - 33));
+    LOBBY_WORLDS: boxes := grid(3, 1, 37, 16, 62, 0, point(self.x2 - 192, h - 45));
+  else
+    if (not self.openTab(LOBBY_PLAYER)) then
+      exit();
+  end;
+
+ // nas.drawing.drawboxes(boxes, false, clblue);
+
+  // a box around each of the quick select world boxes
+  for i := 0 to high(boxes) do
+  begin
+    fWorlds[i] := -1;
+
+    if (countColorTolerance(12484874, boxes[i], 20, colorSetting(1)) > 10) then // Check if fav world exists (Light blue).
+    begin
+      TesseractOCR.setWhitelist(STR_NUMBER);
+      fWorlds[i] := strToIntDef(TesseractOCR.Recognize(boxes[i], -40), -1);
+      TesseractOCR.setWhitelist(STR_EVERYTHING);
+    end;
+  end;
+
+  printf('TRSLobby.quickSelectWorld(): Found worlds %s', [toString(fWorlds)]);
+
+  if (inIntArrayEx(fWorlds, i, world)) then
+  begin
+    if click then
+    begin
+      mouseBox(boxes[i], MOUSE_LEFT);
+      printf('TRSLobby.quickSelectWorld(): Clicked world %d. [Index %d]', [World, i]);
+    end;
+    exit(true);
+  end;
+end;
+
+begin
+  lobby.__init();
+end;
+
+{$f+}

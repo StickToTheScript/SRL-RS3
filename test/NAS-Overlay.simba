@@ -1,0 +1,13 @@
+program new;
+{$DEFINE NAS}
+{$i SRL-RS3/SRL.simba}
+
+begin
+  DisableIPScreenshots := True;
+  SetupSRL();
+
+  // Overlay.Bitmap is a TMufasaBitmap, let's draw a red rectangle.
+  Overlay.Bitmap.Rectangle([100, 100, 200, 200], 255);
+
+  Wait(10000);
+end;
