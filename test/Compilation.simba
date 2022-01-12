@@ -1,0 +1,7 @@
+program new;
+{$i SRL-RS3/SRL.simba}
+
+begin
+  DisableIPScreenshots := True;
+  SetupSRL();
+end;
