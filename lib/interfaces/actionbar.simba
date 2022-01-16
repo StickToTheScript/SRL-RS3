@@ -1329,7 +1329,7 @@ Example:
 
 .. code-block:: pascal
 
-     isIconEnabled(AB_BAR_PRAYER);
+     actionBar.isIconEnabled(AB_BAR_PRAYER);
 *)
 
 function TRSActionBar.isIconEnabled(icon: integer): boolean;

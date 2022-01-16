@@ -280,7 +280,7 @@ findObject
 
 Returns true if an object is successfully found and clicked. If multiple matches
 are found, it will click the one closest to the player. It is recommended to only
-use this if you're object has very distinct colours.
+use this if your object has a very distinct colours.
 
     * **ix, iy** : The coordinates of the object if found.
     * **cols** : The colors to be found.

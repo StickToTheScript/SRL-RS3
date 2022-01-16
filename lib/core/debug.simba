@@ -69,7 +69,7 @@ External SRL debug variables that can be set scripts:
     * disableSRLDebug: boolean; Disables SRL functions from printing to the debug box.  Default false.
 *)
 var
-  logPath = includePath + 'SRL-6/logs/';
+  logPath = includePath + 'SRL-RS3/logs/';
   disableSRLLog = false;
   disableSRLDebug = false;
 

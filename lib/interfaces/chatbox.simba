@@ -209,7 +209,7 @@ Example:
 
 .. code-block:: pascal
 
-    if chatBox.findAnyText(['Hello']) then
+    if chatBox.findText(['Hello']) then
       writeLn('We found Hello in the chatBox');
 *)
 function TRSChatBox.findText(txt: TStringArray; const threshold : Integer = TESS_THRESHOLD_CHATBOX): boolean;

@@ -15,6 +15,57 @@ In order to start using this library:
 
 > All required plugins are included in the repo already.
 
+## Broken Functions
+Below is a list of broken interface functions:
+- Action Bar
+  - __getPercent
+  - isLocked
+  - clear
+  - getAbilityCooldown
+- Backpack
+  - TRSTabBackpack.getMoneyPouchAmount
+  - TRSTabBackpack.isLocked
+- Bankscreen
+  - All Functions
+- Chatbox
+  - getTextOnLine
+- Game Tab
+  - All Functions
+- Lobby
+  - getCurrentTab
+  - openTab
+- Loot Screen
+  - All Functions
+- Main Screen
+  - SetZoom
+  - isPlayerAnimating
+- Metrics
+  - All Functions
+- Minimap
+  - getDots
+  - isFlagPresent
+  - enableRest
+  - getRunEnergy
+  - isRunEnabled
+- Stats
+  - All Functions
+
+## Untested Functions
+Below is a list of interface functions that I have not had the opportunity to test yet:
+- Beast of Burden
+- Collect Box
+- Conversation Box
+- Deposit Box 
+- Hero Screen
+- Pin Screen
+- Power Screen
+- Production
+- Progress Screen
+- Target Info
+- Tool Screen
+- Trade Screen
+- Worlds
+
 ## Troubleshooting
 ### `Duplicate declaration "Tesseract_Create"`
 When attempting to compile or run a script and you encounter `Duplicate declaration "Tesseract_Create"`, simply remove any instance of `{$i Tesseract/Tesseract.simba}` from your script. 

@@ -1,0 +1,376 @@
+program new;
+{$DEFINE NAS}
+{$i SRL-RS3/SRL.simba}
+
+procedure ActionBarTests();
+var
+  I: Integer;
+begin
+  //Writeln("Action Bar Minimized: " + ToStr(Actionbar.minimize()));
+  //Writeln("Action Bar Maximized: " + ToStr(Actionbar.maximize()));
+  Writeln("Health Percentage: " + ToStr(Actionbar.getHPPercent));
+  Writeln("Adrenaline Percentage: " + ToStr(Actionbar.getAdrenalinePercent));
+  Writeln("Prayer Percentage: " + ToStr(Actionbar.getPrayerPercent));
+  Writeln("Summoning Percentage: " + ToStr(Actionbar.getSummoningPercent));
+  //Writeln("Action Bar Preset: " + ToStr(ActionBar.getCurrentBar()));
+
+  //if ActionBar.switchToBar(3) then
+  //  Writeln('Action Bar switched to preset number 3');
+
+  //Writeln("Slot 4 is empty: " + ToStr(ActionBar.isSlotEmpty(4)));
+  //Writeln("Every slot is empty: " + ToStr(ActionBar.isEmpty()));
+
+  // Draw a box around every action bar slot
+  //for I:=1 to (ACTION_BAR_SLOT_HIGH + 1) do
+  //  Overlay.Bitmap.DrawBox(ActionBar.getSlotBox(I), false, clRed);
+
+  //Writeln("Clicking Action Bar slot 1: " + ToStr(ActionBar.clickSlot(1)));
+  //Writeln("Action Bar slot 1 is active: " + ToStr(ActionBar.isSlotActive(1)));
+  //Writeln("Action Bar is locked: " + ToStr(ActionBar.isLocked));
+  //Writeln("Lock Action Bar: " + ToStr(ActionBar.lock));
+  //Writeln("Unlock Action Bar: " + ToStr(ActionBar.unlock));
+  //Writeln("Clearing slot 6: " + ToStr(ActionBar.clearSlot(6)));
+  Writeln("Ability Cooldown for Slot 1: " + ToStr(ActionBar.getAbilityCooldown(1)));
+
+  //Writeln("Clicking Summoning Bar.");
+  //ActionBar.mouseIcon(AB_BAR_SUMMONING);
+
+  //Writeln("Summoning Bar Active: " + ToStr(ActionBar.isIconEnabled(AB_BAR_SUMMONING)));
+
+  //Writeln("Enable Retaliate: " + ToStr(ActionBar.setRetaliate()));
+
+  //Writeln("Quick Prayer Enabled: " + ToStr(ActionBar.setQuickPrayer()));
+  //Writeln("Quick Prayer Disabled: " + ToStr(ActionBar.setQuickPrayer(false)));
+
+  //Writeln("Set Healing Enabled: " + ToStr(ActionBar.setHealing()));
+  //Writeln("Set Healing Disabled: " + ToStr(ActionBar.setHealing(false)));
+
+  Writeln("Clearing the whole Action Bar: " + ToStr(ActionBar.clear));
+end;
+
+procedure BackpackTests();
+var
+  I: Integer;
+  Slots: TBoxArray;
+begin
+  Writeln(#13#10"Running Backpack checks...");
+  Writeln("Backpack Open: " + ToStr(TabBackpack.isOpen()));
+
+  // Draw box around backpack
+  Overlay.Bitmap.DrawBox(TabBackpack.getBounds(), false, clRed);
+
+  // Get all slots and draw boxes around them
+  Slots := TabBackpack.getSlotBoxes();
+  for I:=0 to High(Slots) do
+  begin
+    Overlay.Bitmap.DrawBox(Slots[I], false, clRed);
+
+    // If the slot has an item in slot, mark it with an 'X'
+    if TabBackpack.isItemInSlot(I + 1) then
+       Overlay.Bitmap.DrawText("X", Slots[I], True, clRed);
+  end;
+
+  Writeln("Items in backpack: " + ToStr(TabBackpack.count()));
+  Writeln(ToStr(TabBackpack.getActivatedSlot()) + " slot is active!");
+
+  if TabBackpack.isFull() then
+    Writeln("Backpack is full!");
+
+  // If there are items in the backpack
+  if not TabBackpack.isEmpty() then
+  begin
+    if TabBackpack.isItemInSlot(1) then
+      // Drag item from slot 1 to slot 3
+      TabBackpack.DragSlot(1, 3);
+    
+    if TabBackpack.isItemInSlot(3) then
+      // Drop item in slot 3
+      TabBackpack.DropItems([3]);
+  end;
+
+  WriteLn('I have ', toStr(TabBackpack.getMoneyPouchAmount()), ' in my pouch.');
+
+  if TabBackpack.isLocked() then
+     WriteLn('Backpack is locked!');
+end;
+
+procedure BankscreenTests();
+var
+  I: Integer;
+  Slots: TBoxArray;
+begin
+  Writeln("Found bankscreen: " + ToStr(Bankscreen.__find));
+  if (Bankscreen.isOpen()) then
+  begin
+    // Get all bankscreen slots and draw boxes around them
+    Slots := Bankscreen.getBankSlotBoxes();
+    for I:=0 to High(Slots) do
+    begin
+      Overlay.Bitmap.DrawBox(Slots[I], false, clRed);
+    end;
+
+    // Get all backpack slots and draw boxes around them
+    Slots := Bankscreen.getPackSlotBoxes();
+    for I:=0 to High(Slots) do
+    begin
+      Overlay.Bitmap.DrawBox(Slots[I], false, clRed);
+    end;
+
+    // Draw a Green box around bank slot 1
+    Overlay.Bitmap.DrawBox(Bankscreen.getBankSlotBox(1), false, clRed);
+
+    // Draw a Green box around backpack slot 1
+    Overlay.Bitmap.DrawBox(Bankscreen.getPackSlotBox(1), false, clRed);
+
+//    Writeln("Backpack Count: " + ToStr(Bankscreen.getPackCount()));
+//    Writeln("Item in BackpackSlot 1: " + ToStr(Bankscreen.isItemInPackSlot(1)));
+//    Writeln("Is backpack full: " + ToStr(Bankscreen.isPackFull));
+//    Writeln("Is backpack empty: " + ToStr(Bankscreen.isPackEmpty));
+//                      
+//    // Scroll the bank screen to the top
+//    Bankscreen.scrollUp();
+//
+//    if (not Bankscreen.isTabActive(3)) then
+//    begin
+//      if Bankscreen.openTab(3) then
+//        Writeln("Tab 3 is open.")
+//      else Writeln("Could not open Tab 3.");
+//    end else begin
+//      Writeln("Tab 3 is already open.");
+//    end;
+//
+//    Writeln("Depositing item in slot 1: " + ToStr(BankScreen.deposit([1])));
+//    Writeln("Withdrawing item in slot 10: " + ToStr(BankScreen.withdraw(1, 0, ['Yew Log', 'Log'])));
+//    Writeln("Depositing Backpack: " + ToStr(Bankscreen.quickDeposit(QUICK_DEPOSIT_INVENTORY)));
+//
+//    Writeln("Note button active: " + ToStr(Bankscreen.isButtonActive(BANK_BUTTON_NOTE)));
+//
+//    Writeln("Clicking Preset 1: " + ToStr(BankScreen.clickButton(BANK_BUTTON_PRESET_1)));
+
+    Bankscreen.Close(false);
+  end else Writeln("Bankscreen is not open.");
+end;
+
+procedure ChatboxTests();
+begin 
+  Overlay.Bitmap.DrawBox(Chatbox.getChatArea, false, clRed);
+
+  WriteLn('Found ''Hello'' in the Chatbox: ' + ToStr(ChatBox.findText(['Hello'])));
+  Writeln('Test on Line 1: ' + Chatbox.getTextOnLine(1));
+  //Writeln('Our current XP is: ' + ToStr(Chatbox.getXPBar));
+end;
+
+procedure GametabTests();
+var
+  I: Integer;
+  Tab: TBox;
+  Tabs: TBoxArray;
+begin   
+  Overlay.Bitmap.DrawBox(GameTabs.getActiveTabArea, false, clPurple);
+  Writeln('Multiple game tabs open: ' + ToStr(GameTabs.areMultiOpen()));
+
+//  Tabs := GameTabs.getTabAreas;
+//  for I:=0 to High(Tabs) do
+//  begin   
+//    Overlay.Bitmap.DrawBox(Tabs[I], false, clPurple);
+//  end;
+//
+//  Writeln("Is magic tab visible: " + ToStr(GameTabs.isTabVisible(TAB_MAGIC, Tab)));
+//  Overlay.Bitmap.DrawBox(Tab, false, clPurple);
+//
+//  Writeln("Currently active tab: " + ToStr(GameTabs.getActiveTab()));
+//
+//  if (not GameTabs.isTabActive(TAB_MAGIC)) then
+//  begin
+//    if GameTabs.openTab(TAB_MAGIC) then
+//      Writeln("Pulled up magic tab!")
+//    else Writeln("Could not open Magic tab.");
+//  end else Writeln("Magic tab is already active.");
+end;
+
+procedure LobbyTests();
+var
+  PlayButton: TBox;
+begin
+  if (Lobby.isOpen()) then
+  begin
+    if (Lobby.findPlayButton(PlayButton)) then       
+      Overlay.Bitmap.DrawBox(PlayButton, false, clOrange);
+
+    Writeln("Our current tab is: " + ToStr(Lobby.getCurrentTab()));
+    //Writeln("Open Worlds tab: " + ToStr(Lobby.openTab(LOBBY_WORLDS)));
+    //Writeln("Open Player tab: " + ToStr(Lobby.openTab(LOBBY_PLAYER)));
+
+    //Writeln("Selecting world 1: " + ToStr(Lobby.quickSelectWorld(1)));
+
+  end else Writeln("Loby is not open.");
+end;
+
+procedure LodestoneTests();
+var
+  I: Integer;
+  Box: TBox;
+begin
+  if (LodestoneScreen.isOpen()) then
+  begin
+    for I:=LOCATION_LUNAR_ISLE to LOCATION_PRIFDDINAS do
+    begin
+      Overlay.Bitmap.DrawBox(LodestoneScreen._getTeleportBox(I), false, clAqua);
+    end;
+    Overlay.Bitmap.DrawBox(LodestoneScreen._getTeleportBox(LOCATION_PREVIOUS), false, clAqua);
+
+    //LodestoneScreen.teleportTo(LOCATION_LUMBRIDGE);
+
+    LodestoneScreen.close();
+  end else Writeln("Lodestone screen is not open...");
+end;
+
+procedure LootscreenTests();
+var
+  I: Integer;
+  Boxes: TBoxArray;
+begin
+  if (Lootscreen.isOpen()) then
+  begin
+    Boxes := LootScreen.getSlotBoxes;
+    for I:=0 to High(Boxes) do
+    begin
+      Overlay.Bitmap.DrawBox(Boxes[I], false, clLime);
+    end;
+
+    if Lootscreen.isItemInSlot(1) then
+    begin
+      if LootScreen.lootSlot(1) then
+        Writeln("Got the loot!")
+      else Writeln("Could not take the loot!");
+    end else Writeln("No loot in item slot");
+
+    if Lootscreen.lootSlots([1..5]) then
+      Writeln("Looted the first 5 slots!")
+    else Writeln("Could not loot the first 5 slots!");
+
+    if Lootscreen.clickButton(LOOT_BUTTON_ALL) then
+      Writeln('Looted all items.')
+    else Writeln('Could not loot all items');
+    
+  end else Writeln("Loot screen is not open...");   
+  LootScreen.close();
+end;
+
+procedure MainscreenTests();
+begin
+  Mainscreen.setAngle(MS_ANGLE_HIGH);
+  Mainscreen.setZoom(true);
+  Writeln("Is Player Animating: " + ToStr(Mainscreen.isPlayerAnimating()));
+end;
+
+procedure MetricsTests();
+begin
+   Writeln("XP for the top bar: " + ToStr(metrics.getXP(1)));
+   Writeln("XP for the second bar: " + ToStr(metrics.getXP(2)));
+end;
+
+procedure MinimapTests();
+var
+  Point: TPoint; 
+  Symbols: TFoundSymbols;
+  I: Integer;
+begin
+  //Writeln("Minimap Angle in Radians: " + ToStr(Minimap.getAngleRadians));
+  //Writeln("Minimap Angle in Degrees: " + ToStr(Minimap.getAngleDegrees));
+  //Writeln("Set minimap angle to South: " + ToStr(Minimap.setAngle(MM_DIRECTION_SOUTH)));
+
+  //Minimap.clickCompass();
+
+  //Overlay.Bitmap.DrawTPA(Minimap.getDots(MM_DOT_NPC, Minimap.getBounds), clPink);
+
+  //if Minimap.isFlagPresent(Point) then
+  //begin
+  //  Overlay.Bitmap.drawCircle(Point, 5, true, clPink);
+  //  Writeln("Distance to Flag: " + ToStr(Minimap.getFlagDistance()));
+  //  Writeln("Is player moving: " + ToStr(Minimap.isPlayerMoving()));
+  //end;
+
+  //Minimap.FindSymbols([MM_SYMBOL_BANK, MM_SYMBOL_DUNGEON, MM_SYMBOL_FISHING], Minimap.getBounds(), Symbols, False);
+  //for i := 0 to High(Symbols) do
+  //begin
+  //  WriteLn('Found symbol: ' + toStr(Symbols[i].ID));
+  //  Overlay.Bitmap.drawCircle(Symbols[i].Pos, 7, False, clPink);
+  //  Overlay.Bitmap.drawCross(Symbols[i].Pos, 5, clPink);
+  //  Writeln(Symbols[i].Acc);
+  //end;
+  //Writeln("Enable Resting: " + ToStr(Minimap.enableRest));
+  //Writeln("Resting: " + ToStr(Minimap.isResting));
+
+  //Writeln("Our run energy is: " + ToStr(Minimap.getRunEnergy));
+  //Minimap.toggleRun(true);
+  //Writeln("Is Run enabled: " + ToStr(Minimap.isRunEnabled));
+
+  //Point := Minimap.pointToMainscreen(Minimap.getBounds.getMiddle);
+  //Overlay.Bitmap.drawCircle(Point, 15, False, clPink);
+end;
+
+procedure OptionsTests();
+begin
+  Options.Open();
+  if (Options.isOpen()) then
+  begin
+    if Options.selectOption(['Logout', 'gout']) then
+      WriteLn('Successfully clicked the logout button!')
+    else Writeln("Could not press the logout button!");
+  end;
+end;
+
+procedure StatsTests();
+var
+  I: Integer;
+begin
+  TabStats.open();
+
+  if (TabStats.isOpen) then
+  begin
+    for I:=SKILL_ATTACK to SKILL_DIVINATION do
+    begin
+      Overlay.Bitmap.DrawBox(tabStats.getSkillBox(I), false, clLime);
+      Writeln("Skill Level: " + ToStr(TabStats.getSkillLevel(I)));
+      Writeln("Skill XP: " + ToStr(TabStats.getSkillInfo(I, INFO_CURRENT_XP)));
+    end;
+  end else Writeln("Stats did not open....");
+end;
+
+procedure Setup();
+begin
+  ClearDebug();
+  DisableIPScreenshots := True;
+  SetupSRL();
+  DisableSRLLog := True;
+  DisableSRLDebug := True;
+end;
+
+procedure highlightbitmap(bmp: integer);
+var
+  loc: TPoint;
+begin
+  FindBitmap(bmp, loc.X, loc.Y);
+  Overlay.Bitmap.DrawText("X", loc, clRed);
+end;
+
+begin
+  Setup();
+  //ActionBarTests();
+  //BackpackTests();
+  //BankscreenTests();
+  //ChatboxTests();
+  //GametabTests();
+  //LobbyTests();
+  //LodestoneTests();
+  //LootscreenTests();
+  //MainscreenTests();
+  //MetricsTests();
+  //MinimapTests();
+  //OptionsTests();
+  //StatsTests();
+
+  Writeln("Waiting 5 seconds before exiting...");
+  Wait(5000);
+end;

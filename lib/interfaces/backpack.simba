@@ -258,7 +258,7 @@ Returns true if it successfully opens the backpack tab (or it's already open).
 .. note::
 
     - by Olly
-    - Last Updated: 11 March 2013 by Olly
+    - Last Updated: 15 January 2022 by StickToTheScript
 
 Example:
 
@@ -269,10 +269,11 @@ Example:
 *)
 function TRSTabBackpack.open(): boolean;
 begin
-  result := self.isOpen();
+  if self.isOpen() then
+    Exit(True);
 
-  if (not result) then
-     typeByte(vk_b);// result := gameTabs.openTab(self.tabIndex);
+  typeByte(vk_b);// result := gameTabs.openTab(self.tabIndex);
+  result := self.isOpen();
 end;
 
 {*
@@ -381,7 +382,7 @@ Example:
 *)
 function TRSTabBackpack.getSlotBoxes(): TBoxArray;
 begin
-  result := self.LoadSlotBoxes(self.getbounds(), 'includes\srl-6.9\lib\interfaces\slots.txt');
+  result := self.LoadSlotBoxes(self.getbounds(), 'Includes\SRL-RS3\lib\interfaces\slots.txt');
 end;
 
 (*
@@ -1194,7 +1195,6 @@ begin
     exit();
 
   b := intToBox(gameTabs.TabArea.x1 + 147, gameTabs.TabArea.y2 - 30, gameTabs.TabArea.x2 - 25, gameTabs.TabArea.y2 - 10);
-
   s := replace(TesseractOCR.Recognize(b, 30), ' ', '', [rfReplaceAll]);
   result := strToIntDef(extractFromStr(s, numbers), 0);
 
