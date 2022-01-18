@@ -1123,7 +1123,7 @@ Example:
 {$IFNDEF CODEINSIGHT}
 function TRSActionBar.__getPercent(offset: integer): byte;
 const
-  BACKGROUND_COLOR = 2236185;
+  BACKGROUND_COLOR = 2433563;
 var
   xx, yy: integer;
 begin

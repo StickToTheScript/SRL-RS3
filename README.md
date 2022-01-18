@@ -18,7 +18,6 @@ In order to start using this library:
 ## Broken Functions
 Below is a list of broken interface functions:
 - Action Bar
-  - __getPercent
   - isLocked
   - clear
   - getAbilityCooldown
