@@ -748,9 +748,9 @@ Example:
 *)
 function TRSActionBar.isLocked(): boolean;
 const
-  GAP_COLOR = 1775120; // Point between the shackle and the body.
+  GAP_COLOR = 1709327; // Point between the shackle and the body.
 begin                             // I.e. the gap when it's unlocked
-  result := (not (getColor(self.x2 - 9, self.y2 - 13) = GAP_COLOR));
+  result := (not (getColor(self.x2 - 7, self.y2 - 11) = GAP_COLOR));
 end;
 
 {*
