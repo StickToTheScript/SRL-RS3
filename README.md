@@ -19,7 +19,7 @@ In order to start using this library:
 Below is a list of broken interface functions:
 - Action Bar
   - clear
-  - getAbilityCooldown
+  - getAbilityCooldown (Partially functional)
 - Backpack
   - TRSTabBackpack.getMoneyPouchAmount
   - TRSTabBackpack.isLocked

@@ -969,12 +969,15 @@ begin
   result := - 1;
 
   try
+    if (inActionBar) then
+      boxToCheck.setBounds(boxToCheck.x1 + 6, boxToCheck.Y1 + 6, boxToCheck.X2 - 6, boxToCheck.Y2 - 6);
+
     clientBitmap := bitmapFromClient(boxToCheck.x1, boxToCheck.y1, boxToCheck.x2, boxToCheck.y2);
     setBitmapName(clientBitmap, 'Cooldown Bitmap');
 
     if (inActionBar) then
     begin
-      tpa := tpaFromBox(intToBox(boxToCheck.x1 + 2, boxToCheck.y1 + 18, boxToCheck.x1 + 8, boxToCheck.y1 + 25));
+      tpa := tpaFromBox(intToBox(boxToCheck.x1 + 2, boxToCheck.y1 + 12, boxToCheck.x1 + 8, boxToCheck.y1 + 18));
       tpa.offset(point( - boxToCheck.x1, - boxToCheck.y1));
 
       for i := 0 to high(tpa) do
@@ -1012,11 +1015,7 @@ begin
 
       if (inActionBar) then
       begin
-
-        if (inRange(i, 0, len div 2)) then
-          midPoint := point(14, 15)
-        else
-          midPoint := point(15, 14);
+          midPoint := point(9, 7);
       end else
       begin
 
@@ -1031,7 +1030,7 @@ begin
       line.invert();
 
       if (i = 0) then
-        setlength(line, 6)
+        setlength(line,4)
       else
         setlength(line, length(line) - 3);
 
@@ -1046,7 +1045,10 @@ begin
         if (result = 99) then
         begin
 
-          colorFix := getColor(boxToCheck.x1 + 14, boxToCheck.y1 + 2);
+          if (InActionBar) then
+            colorFix := getColor(boxToCheck.x1 + 9, boxToCheck.y1 + 2)
+          else
+            colorFix := getColor(boxToCheck.x1 + 14, boxToCheck.y1 + 2);
 
           if ((colorFix = 6706) or (colorFix = 1710617)) then
           begin
