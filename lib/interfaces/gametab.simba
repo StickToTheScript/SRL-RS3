@@ -108,6 +108,7 @@ type
   TRSGameTabs = record(TRSInterface)
     tabs: array of _TRSGameTab;
     isSetup: boolean;
+    tabBitmapStart, tabBitmapEnd: Integer;
     tabArea: TBox;
     __tabSelectionArea: TBox;
     navButtons: array [0..7] of TBoxArray;
@@ -172,6 +173,8 @@ begin
     ID := ID_INTERFACE_GAMETABS;
     parentID := -1;
     isStatic := false;
+    tabBitmapStart := BitmapFromString(6, 19, 'meJw9j8EKglAQRQkiKCzyZYKaJUllPGohEpFBkNCiFhGtwg/o//+gYxeE4XHvce7MaJeTNHYj083m4zhwZ9NBvvHsH/KKNDZ0/FGnsBGWQihFM9YzQywT2izB3SrYxg72uF+sEwNpUmFDKI2FkJKA0IMmRRscojNYlPh93dMSTdCF38/tfS+p+nWtn+dHVVBaxGqGI6qTlWVCSySkL4dMPVxe5ikr+GWIIiKUCIVI/B6n8klDENwJ+QG7wyx1');
+    tabBitmapEnd := BitmapFromString(6, 25, 'meJw9kc1OwzAQhIXEhdQutV1HdWKHkPDTqLSHiEOl3jiAxAnECfEAvP8b8NkrKq2szezO7OzGOx03Zkqqr692gzvN47a3a6vHZMZGPfQWcIir6Bf7+9DaS2J+GlpfeafPyPFwk+oFFOh8QiQZkukaMz+uUSCed20K6FQ0CwswTyksckq8KRjaRFlYZXqVh/6zsnIwZ4Seu85MvUWHRUBI4ua6LYJCAenC8jaabbfKDpMBrJ32VosNXqw6o9kdwXp5wRbiCh1KwqIEOJWzAKI2FjNYYq9cSgrziIhyFm8ULA5Im9BhkdDA0bJCo2CB04BDEv6F2OYUskW2UZCv99PH2/Hn84WE+P1+/QNWGzQg');
     tabArea := [576, 292, 799, 599];
     __tabSelectionArea := [581, 296, 796, 319];
     isSetup := false;
@@ -392,18 +395,22 @@ function TRSGameTabs.getActiveTabArea(): TBox;
 const
   COLOR_ACTIVE_TAB = 7037013;
 var
-  b, box: TBox;
+  searchBounds: TBox;
+  p1, p2: TPoint;
   tpa: TPointArray;
+  msMiddleX: Integer;
 begin
   if (not self.isSetup) then
     self.__initTabs();
-   
-  box := gameTabs.__tabSelectionArea;
-  b := [box.x1, box.y1, box.x2, box.y1 +5];
+
+  searchBounds := Mainscreen.getBounds;
+  msMiddleX := Round((searchBounds.X2 - searchBounds.X1) / 2);
+  if findBitmapToleranceIn(self.tabBitmapStart, p1.x, p1.y, [msMiddleX, searchBounds.Y1, searchBounds.X2, searchBounds.Y2], 30) and findBitmapToleranceIn(self.tabBitmapEnd, p2.x, p2.y, [p1.x, p1.y - 17, searchBounds.x2, p1.y + 12], 30) then
+    __tabSelectionArea := [p1.x, p1.y - 17, p2.x, p2.y + 26];
 
   result := [-1, -1, -1, -1];
 
-  if (findColors(tpa, COLOR_ACTIVE_TAB, b)) then
+  if (findColors(tpa, COLOR_ACTIVE_TAB, __tabSelectionArea)) then
   begin
     result := tpa.getBounds();
     incEx(result.y2, 20);
@@ -470,9 +477,14 @@ var
   b, bounds: TBox;
   atpa: T2DPointArray;
   tpa: TPointArray;
-begin
+begin  
+  b := self.getActiveTabArea();
+
+  if (b.x1 <> -1) then
+    insert(b, result);
+
   b := [gameTabs.__tabSelectionArea.x1, gameTabs.__tabSelectionArea.y1, // top of each gametab area
-        gameTabs.__tabSelectionArea.x2, gameTabs.__tabSelectionArea.y1 + 5];
+        gameTabs.__tabSelectionArea.x2, gameTabs.__tabSelectionArea.y1 + 15];
 
   if (findColors(tpa, COLOR_NON_ACTIVE_TAB, b)) then
   begin
@@ -488,11 +500,6 @@ begin
         insert(bounds, result);
       end;
   end;
-
-  b := self.getActiveTabArea();
-
-  if (b.x1 <> -1) then
-    insert(b, result);
 end;
 
 (*

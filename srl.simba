@@ -35,7 +35,8 @@ var
 {$include_once lib/interfaces/interfaces.simba}
 {$include_once lib/interfaces/chooseoption.simba}
 {$include_once lib/misc/items.simba}
-
+                                            
+{$include_once lib/interfaces/mainscreen.simba}
 {$include_once lib/interfaces/gametab.simba}
 {$include_once lib/interfaces/backpack.simba}
 {$include_once lib/interfaces/stats.simba}
@@ -45,7 +46,6 @@ var
 {$include_once lib/interfaces/worlds.simba}
 {$include_once lib/interfaces/conversationbox.simba}
 {$include_once lib/interfaces/actionbar.simba}
-{$include_once lib/interfaces/mainscreen.simba}
 {$include_once lib/interfaces/minimap.simba}
 
 {$include_once lib/interfaces/pinscreen.simba}
