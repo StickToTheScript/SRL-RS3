@@ -796,12 +796,13 @@ var
   tpa: TPointArray;
   atpa: T2DPointArray;
   r, t: integer;
-  b: TBox;
+  b, tabArea: TBox;
 begin
   t := gameTabs.getActiveTab();
+  tabArea := GameTabs.GetTabArea();
   gameTabs.openTab(TAB_FRIENDS);
 
-  if (findColorsTolerance(tpa, 5301219, gameTabs.tabArea, 10, colorSetting(2, 0.02, 2.76))) then
+  if (findColorsTolerance(tpa, 5301219, tabArea, 10, colorSetting(2, 0.02, 2.76))) then
   begin
     atpa := clusterTPAEx(tpa, 20, 3);
     filterTPAsBetween(atpa, 0, 5);
@@ -809,7 +810,7 @@ begin
     if (high(atpa) > -1) then
     begin
       b := getTPABounds(atpa[random(high(atpa))]);
-      mouse(intToBox(gameTabs.tabArea.x1+10, b.y1, b.x2, b.y2).getRandomPoint());
+      mouse(intToBox(tabArea.x1+10, b.y1, b.x2, b.y2).getRandomPoint());
       wait(500 + random(2000));
 
       if (random(2) = 0) then

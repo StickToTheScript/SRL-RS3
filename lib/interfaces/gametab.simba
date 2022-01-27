@@ -108,9 +108,8 @@ type
   TRSGameTabs = record(TRSInterface)
     tabs: array of _TRSGameTab;
     isSetup: boolean;
-    tabBitmapStart, tabBitmapEnd: Integer;
-    tabArea: TBox;
-    __tabSelectionArea: TBox;
+    tabSelectionBitmapStart, tabSelectionBitmapEnd,
+    tabBitmapTopLeft, tabBitmapBottomRight: Integer;
     navButtons: array [0..7] of TBoxArray;
   end;
 
@@ -173,10 +172,10 @@ begin
     ID := ID_INTERFACE_GAMETABS;
     parentID := -1;
     isStatic := false;
-    tabBitmapStart := BitmapFromString(6, 19, 'meJw9j8EKglAQRQkiKCzyZYKaJUllPGohEpFBkNCiFhGtwg/o//+gYxeE4XHvce7MaJeTNHYj083m4zhwZ9NBvvHsH/KKNDZ0/FGnsBGWQihFM9YzQywT2izB3SrYxg72uF+sEwNpUmFDKI2FkJKA0IMmRRscojNYlPh93dMSTdCF38/tfS+p+nWtn+dHVVBaxGqGI6qTlWVCSySkL4dMPVxe5ikr+GWIIiKUCIVI/B6n8klDENwJ+QG7wyx1');
-    tabBitmapEnd := BitmapFromString(6, 25, 'meJw9kc1OwzAQhIXEhdQutV1HdWKHkPDTqLSHiEOl3jiAxAnECfEAvP8b8NkrKq2szezO7OzGOx03Zkqqr692gzvN47a3a6vHZMZGPfQWcIir6Bf7+9DaS2J+GlpfeafPyPFwk+oFFOh8QiQZkukaMz+uUSCed20K6FQ0CwswTyksckq8KRjaRFlYZXqVh/6zsnIwZ4Seu85MvUWHRUBI4ua6LYJCAenC8jaabbfKDpMBrJ32VosNXqw6o9kdwXp5wRbiCh1KwqIEOJWzAKI2FjNYYq9cSgrziIhyFm8ULA5Im9BhkdDA0bJCo2CB04BDEv6F2OYUskW2UZCv99PH2/Hn84WE+P1+/QNWGzQg');
-    tabArea := [576, 292, 799, 599];
-    __tabSelectionArea := [581, 296, 796, 319];
+    tabSelectionBitmapStart := BitmapFromString(6, 19, 'meJw9j8EKglAQRQkiKCzyZYKaJUllPGohEpFBkNCiFhGtwg/o//+gYxeE4XHvce7MaJeTNHYj083m4zhwZ9NBvvHsH/KKNDZ0/FGnsBGWQihFM9YzQywT2izB3SrYxg72uF+sEwNpUmFDKI2FkJKA0IMmRRscojNYlPh93dMSTdCF38/tfS+p+nWtn+dHVVBaxGqGI6qTlWVCSySkL4dMPVxe5ikr+GWIIiKUCIVI/B6n8klDENwJ+QG7wyx1');
+    tabSelectionBitmapEnd := BitmapFromString(6, 25, 'meJw9kc1OwzAQhIXEhdQutV1HdWKHkPDTqLSHiEOl3jiAxAnECfEAvP8b8NkrKq2szezO7OzGOx03Zkqqr692gzvN47a3a6vHZMZGPfQWcIir6Bf7+9DaS2J+GlpfeafPyPFwk+oFFOh8QiQZkukaMz+uUSCed20K6FQ0CwswTyksckq8KRjaRFlYZXqVh/6zsnIwZ4Seu85MvUWHRUBI4ua6LYJCAenC8jaabbfKDpMBrJ32VosNXqw6o9kdwXp5wRbiCh1KwqIEOJWzAKI2FjNYYq9cSgrziIhyFm8ULA5Im9BhkdDA0bJCo2CB04BDEv6F2OYUskW2UZCv99PH2/Hn84WE+P1+/QNWGzQg');
+    tabBitmapTopLeft := BitmapFromString(15, 26, 'meJyNkt9LwmAUhg3CsLRQ27Ccc0wb2prl/EGkUimYJBnmRZhX4UUX/f/3PePQGKif+3iRd2eP7znf0URi5/n+elt/jpez/vpj8Lt6QVsxgMngZtQyem4eNR3Nt08wm+Ri0uGtYKhV14XchAmUKDTsVAmn8nyrST1KTp8aVK6tDGq7xd23CTLvPZOm9VKm51cU5HzcpS+BkHxFmenRVK6sJjmQlcs0mdxITfabpmvn0WO3piYl1tCOfc/eSwp85xTikJyf5Xjx2kOr+VBMVKv3fviJpqO2zOxYuUZNp5E8RsUrMaMHVx4rpawUg+X8+1AUiQIO0/jhEGsRE4oKmAjMu7qgyFqKuUOEYfMiS09RoRceWGYQ2CykkWBuOWNqSaecd4yzRlUrnx8JjDABYG/5h4eHwHBgCVTAMrPAzKafHuyFWQhGbhcnGWPpSfUY7DACp2LOHGyjlIWPOTOxLFkB/wFTkGNt');
+    tabBitmapBottomRight := BitmapFromString(15, 15, 'meJyNkk+PgjAQxTkh2LoYBVtKaWv9ExKyHjbEGN1kD1w2uwcPHv3+38OnkxAPSiCTyWv5MX0zJQjePmUWq1nYHuumLk5fK4j3bODEuExHwGo/R/TDZRZ5ycAMge0iWineNm4I7ESMGFi5mIc6HXUwzPfZENyIoZ59ztyjQYwO8M++6oc3+oMqg/9vGyuZy7mRk1JwTPXelOReT72aVHa61gngz01ONqxgJoucSqxKjBibRbyUbKm4TkN4KNKog9Hg5e90PX8jvwwcDQYe6MapU2qBBAUtt25Ggmwg45q6nV2lnj8nmIoDxkCgDztLgv6uLlPgFZbn3+MNhnlCJg==');
     isSetup := false;
 
     //high(navButtons[tab])is the actual button, the the next are the tab buttons when it's mouse-over'd
@@ -190,6 +189,8 @@ begin
     self.navButtons[NAV_BUTTON_EXTRAS] := grid(1, 1, 27, 27, 50, 36, point(652, 258));
     self.navButtons[NAV_BUTTON_GROUPING] := grid(1, 4, 27, 27, 50, 36, point(702, 258 - (36 * 3)));
     self.navButtons[NAV_BUTTON_SETTINGS] := grid(1, 3, 27, 27, 50, 36, point(752, 258 - (36 * 2)));
+
+    addOnTerminate('__freeGameTabs');
   end;
 end;
 {$ENDIF}
@@ -322,7 +323,6 @@ begin
   end;
 
   self.isSetup := true;
-  addOnTerminate('__freeGameTabs');
 
   for i := 0 to high(self.tabs) do
     setBitmapName(self.tabs[i]._bmp, 'Gametab Bitmap['+toStr(i)+']');
@@ -359,10 +359,104 @@ var
 begin
   print('Freeing gametabs bitmaps...');
 
+  freeBitmap(GameTabs.tabSelectionBitmapStart);
+  freeBitmap(GameTabs.tabSelectionBitmapEnd);
+  freeBitmap(GameTabs.tabBitmapTopLeft);
+  freeBitmap(GameTabs.tabBitmapBottomRight);
+
   for i := 0 to high(gameTabs.tabs) do
     freeBitmap(gameTabs.tabs[i]._bmp);
 end;
 {$ENDIF}
+
+(*
+GetTabSelectionArea
+-------------------
+
+.. code-block:: pascal
+
+    function TRSGameTabs.GetTabSelectionArea(): TBox;
+
+Returns the TBox of the tab selection area. It will return [-1, -1, -1, -1] if
+one or no tabs are active.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    var
+      b: TBox;
+    begin
+      b := gameTabs.GetTabSelectionArea()
+
+    end;
+*)
+function TRSGameTabs.GetTabSelectionArea(): TBox;
+var
+  searchBounds: TBox;
+  p1, p2: TPoint;
+  msMiddleX: Integer;
+begin
+  result := [-1, -1, -1, -1];
+
+  searchBounds := Mainscreen.getBounds;
+  msMiddleX := Round((searchBounds.X2 - searchBounds.X1) / 2);
+  if findBitmapToleranceIn(self.tabSelectionBitmapStart, p1.x, p1.y, [msMiddleX, searchBounds.Y1, searchBounds.X2, searchBounds.Y2], 30) and findBitmapToleranceIn(self.tabSelectionBitmapEnd, p2.x, p2.y, [p1.x, p1.y - 17, searchBounds.x2, p1.y + 12], 30) then
+    result := [p1.x, p1.y - 17, p2.x, p2.y + 26];
+end;
+
+
+(*
+GetTabArea
+----------
+
+.. code-block:: pascal
+
+    function TRSGameTabs.GetTabArea(): TBox;
+
+Returns the TBox of the tab area. It will return [-1, -1, -1, -1] if no tab is
+found.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    var
+      b: TBox;
+    begin
+      b := gameTabs.GetTabArea()
+
+    end;
+*)
+function TRSGameTabs.GetTabArea(): TBox;
+var
+  msBounds, tabSelectArea: TBox;
+  p1, p2, msQuarter: TPoint;
+begin
+  result := [-1, -1, -1, -1];
+
+  msBounds := Mainscreen.GetBounds();
+  msQuarter := [Round((msBounds.X2 - msBounds.X1) * 0.25), Round((msBounds.Y2 - msBounds.Y1) * 0.25)];
+  tabSelectArea := GetTabSelectionArea();
+
+  if (tabSelectArea <> [-1, -1, -1, -1]) then
+  begin
+    if findBitmapToleranceIn(self.tabBitmapBottomRight, p1.x, p1.y, [tabSelectArea.X1, tabSelectArea.Y2, tabSelectArea.X2 + 15, msBounds.Y2], 30) then
+      result := [tabSelectArea.X1, tabSelectArea.Y2, p1.x + 13, p1.y + 13];
+  end else
+  begin
+    if findBitmapToleranceIn(self.tabBitmapTopLeft, p1.x, p1.y, [msQuarter.X, msQuarter.Y, msBounds.X2, msBounds.Y2], 50) and findBitmapToleranceIn(self.tabBitmapBottomRight, p2.x, p2.y, [p1.X, p1.Y, msBounds.X2, msBounds.Y2], 30) then
+      result := [p1.X + 2, p1.y + 12, p2.X + 12, p2.y + 12];
+  end;
+end;
 
 (*
 getActiveTabArea
@@ -395,22 +489,16 @@ function TRSGameTabs.getActiveTabArea(): TBox;
 const
   COLOR_ACTIVE_TAB = 7037013;
 var
-  searchBounds: TBox;
-  p1, p2: TPoint;
+  tabSelectionArea: TBox;
   tpa: TPointArray;
-  msMiddleX: Integer;
 begin
   if (not self.isSetup) then
     self.__initTabs();
 
-  searchBounds := Mainscreen.getBounds;
-  msMiddleX := Round((searchBounds.X2 - searchBounds.X1) / 2);
-  if findBitmapToleranceIn(self.tabBitmapStart, p1.x, p1.y, [msMiddleX, searchBounds.Y1, searchBounds.X2, searchBounds.Y2], 30) and findBitmapToleranceIn(self.tabBitmapEnd, p2.x, p2.y, [p1.x, p1.y - 17, searchBounds.x2, p1.y + 12], 30) then
-    __tabSelectionArea := [p1.x, p1.y - 17, p2.x, p2.y + 26];
-
   result := [-1, -1, -1, -1];
 
-  if (findColors(tpa, COLOR_ACTIVE_TAB, __tabSelectionArea)) then
+  tabSelectionArea := GetTabSelectionArea();
+  if (findColors(tpa, COLOR_ACTIVE_TAB, tabSelectionArea)) then
   begin
     result := tpa.getBounds();
     incEx(result.y2, 20);
@@ -474,7 +562,7 @@ const
   COLOR_NON_ACTIVE_TAB = 5458491;
 var
   i: integer;
-  b, bounds: TBox;
+  b, bounds, tabSelectionArea: TBox;
   atpa: T2DPointArray;
   tpa: TPointArray;
 begin  
@@ -483,8 +571,10 @@ begin
   if (b.x1 <> -1) then
     insert(b, result);
 
-  b := [gameTabs.__tabSelectionArea.x1, gameTabs.__tabSelectionArea.y1, // top of each gametab area
-        gameTabs.__tabSelectionArea.x2, gameTabs.__tabSelectionArea.y1 + 15];
+  tabSelectionArea := GetTabSelectionArea();
+
+  b := [tabSelectionArea.x1, tabSelectionArea.y1, // top of each gametab area
+        tabSelectionArea.x2, tabSelectionArea.y1 + 15];
 
   if (findColors(tpa, COLOR_NON_ACTIVE_TAB, b)) then
   begin
@@ -746,6 +836,7 @@ begin
   end;
 
   if (self.areMultiOpen) then
+  begin
     if (self.isTabVisible(tab, b)) then
     begin
       print('Tab is already visible, bringing to front');
@@ -755,6 +846,7 @@ begin
       print('TRSGameTabs.openTab('+toStr(tab)+'): = '+toStr(result), TDebug.FOOTER);
       exit(true);
     end;
+  end;
 
   print('Opening tab via gametab navigation bar');
   self.__openViaNavBar(tab);

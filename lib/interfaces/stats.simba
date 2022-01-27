@@ -164,11 +164,15 @@ Example:
 function TRSTabStats.isOpen(): boolean;
 const
   BAR_COLOR = 7056896;
+var
+  tabArea: TBox;
 begin
   result := (gameTabs.isTabActive(self.tabIndex));
 
+  tabArea := GameTabs.GetTabArea();
+
   if (not result) then
-    result := (getColor(gameTabs.tabArea.x1 + 95, gameTabs.tabArea.y2 -27) = 7056896);
+    result := (getColor(tabArea.x1 + 95, tabArea.y2 -27) = 7056896);
 end;
 
 (*
@@ -231,13 +235,16 @@ Example:
 function TRSTabStats.getSkillBox(skill: integer): TBox;
 var
   offSet: TPoint;
+  tabArea: TBox;
 begin
+  tabArea := GameTabs.GetTabArea();
+
   if gameTabs.areMultiOpen() then
     offset := [0, 45]
   else
     offset := [15, 17];
 
-  result := gridBox(skill, 3, 9, 58, 24, 65, 27, point(gameTabs.tabArea.x1 + 38 + offset.x, gameTabs.tabArea.y1 + offset.y));
+  result := gridBox(skill, 3, 9, 58, 24, 65, 27, point(tabArea.x1 + 38 + offset.x, tabArea.y1 + offset.y));
 end;
 
 (*

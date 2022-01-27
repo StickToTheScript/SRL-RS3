@@ -136,14 +136,16 @@ Example:
 {$IFNDEF CODEINSIGHT}
 procedure TRSChatBox.__setup();
 var
-  b, chatBounds: TBox;
+  b, chatBounds, tabArea: TBox;
   wid, hei, i: integer;
   p: TPoint;
 begin
   setLength(self.lineBoxes, 0);
   getClientDimensions(wid, hei);
 
-  self.setBounds([1, actionBar.y2, gameTabs.tabArea.x1, hei-2]);
+  tabArea := GameTabs.GetTabArea();
+
+  self.setBounds([1, actionBar.y2, tabArea.x1, hei-2]);
   chatBounds := chatBox.getChatArea();
 
   for i := 0 to 10 do
