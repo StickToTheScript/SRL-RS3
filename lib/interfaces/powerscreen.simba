@@ -652,7 +652,7 @@ begin
 
   while (not result) and (i < 2) do  // Attempt up to 2 times due to lag.
   begin
-    mouseBox(gameTabs.navButtons[NAV_BUTTON_POWERS][0], MOUSE_LEFT);
+    Navigation.Open(NAV_PRIMARY_POWERS);
     t := getSystemTime() + waitTime + random(400);
     repeat
       wait(750 + random(834));

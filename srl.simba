@@ -37,6 +37,7 @@ var
 {$include_once lib/misc/items.simba}
                                             
 {$include_once lib/interfaces/mainscreen.simba}
+{$include_once lib/interfaces/navigation.simba}
 {$include_once lib/interfaces/gametab.simba}
 {$include_once lib/interfaces/backpack.simba}
 {$include_once lib/interfaces/stats.simba}

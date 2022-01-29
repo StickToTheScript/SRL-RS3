@@ -453,7 +453,7 @@ begin
 
   repeat
     tab := random(high(gameTabs.tabs));
-  until (tab <> t) and (tab <> TAB_TASK); // make sure it's a different tab
+  until (tab <> t) and (tab <> TAB_ACHIEVEMENTS); // make sure it's a different tab
 
   gameTabs.openTab(tab);
   wait(randomRange(300, 1000));

@@ -9,38 +9,6 @@ The source for this file can be found `here <https://github.com/SRL/SRL-6/blob/m
 *)
 
 (*
-Consts, Types, Vars
-~~~~~~~~~~~~~~~~~~~
-
-The following constants, types and variables are used throughout the chatBox methods.
-
-**const Nav Buttons**
-
-Constants that represent the buttons on the navigation pane. These buttons
-contain the individual gametab buttons.
-
-    * NAV_BUTTON_HERO
-    * NAV_BUTTON_CUSTOM
-    * NAV_BUTTON_ADVENTURES
-    * NAV_BUTTON_POWERS
-    * NAV_BUTTON_SOCIAL
-    * NAV_BUTTON_EXTRAS
-    * NAV_BUTTON_GROUPING
-    * NAV_BUTTON_SETTINGS
-
-*)
-
-const
-  NAV_BUTTON_HERO = 0;
-  NAV_BUTTON_CUSTOM = 1;
-  NAV_BUTTON_ADVENTURES = 2;
-  NAV_BUTTON_POWERS = 3;
-  NAV_BUTTON_SOCIAL = 4;
-  NAV_BUTTON_EXTRAS = 5;
-  NAV_BUTTON_GROUPING = 6;
-  NAV_BUTTON_SETTINGS = 7;
-
-(*
 **const Tabs**
 
 Constants that represent each gametab.
@@ -62,24 +30,37 @@ Constants that represent each gametab.
 
 *)
 const
-  TAB_TASK = 0;
-  TAB_STATS = 1;
+  // Hero Tabs
+  TAB_STATS = 0;
+  TAB_BACKPACK = 1;
+  TAB_EQUIPMENT = 2;
+  TAB_ACHIEVEMENTS = 3;
 
-  TAB_BACKPACK = 2;
-  TAB_EQUIPMENT = 3;
+  // Adventure Tabs
+  TAB_QUESTS = 4;
+  TAB_ACTIVITIES = 5;
 
-  TAB_PRAYER = 4;
-  TAB_MAGIC = 5;
-  TAB_MELEE = 6;
-  TAB_RANGED = 7;
-  TAB_DEFENSIVE = 8;
+  // Power Tabs
+  TAB_PRAYER = 6;
+  TAB_FAMILIAR = 7;
+  TAB_MAGIC = 8;
+  TAB_MELEE = 9;
+  TAB_RANGED = 10;
+  TAB_DEFENSIVE = 11;
 
-  TAB_FRIENDS = 9;
-  TAB_FRIENDS_CHAT = 10;
-  TAB_CLAN_CHAT = 11;
+  // Community Tabs
+  TAB_FRIENDS = 12;
+  TAB_FRIENDS_CHAT = 13;
+  TAB_CLAN_CHAT = 14;
+  TAB_GROUP = 15;
 
-  TAB_NOTES = 12;
-  TAB_MUSIC = 13;
+  // RuneMetrics Tabs
+  TAB_GRAPHS = 16;
+  TAB_DROPS = 17;
+
+  // Settings Tabs
+  TAB_NOTES = 18;
+  TAB_MUSIC = 19;
 
 {*
 **type _TRSGameTab**
@@ -89,7 +70,7 @@ Internal type which holds individual tab properties
 type
   _TRSGameTab = record
     _bmp: integer;    // bitmap of the tab (used for switching between tabs)
-    _navBarID: integer; // the constant representing the nav bar
+    _navBarID: TNavPrimaryButton; // the constant representing the nav bar
     _navBarBoxIndex: integer; // the index of the box of the nav bar (when it's moused over)
   end;
 
@@ -107,10 +88,9 @@ A type that stores the global gametab interface properties.
 type
   TRSGameTabs = record(TRSInterface)
     tabs: array of _TRSGameTab;
-    isSetup: boolean;
     tabSelectionBitmapStart, tabSelectionBitmapEnd,
-    tabBitmapTopLeft, tabBitmapBottomRight: Integer;
-    navButtons: array [0..7] of TBoxArray;
+    tabBitmapTopLeft, tabBitmapBottomRight: Integer; 
+    isSetup: boolean;
   end;
 
 (*
@@ -178,30 +158,18 @@ begin
     tabBitmapBottomRight := BitmapFromString(15, 15, 'meJyNkk+PgjAQxTkh2LoYBVtKaWv9ExKyHjbEGN1kD1w2uwcPHv3+38OnkxAPSiCTyWv5MX0zJQjePmUWq1nYHuumLk5fK4j3bODEuExHwGo/R/TDZRZ5ycAMge0iWineNm4I7ESMGFi5mIc6HXUwzPfZENyIoZ59ztyjQYwO8M++6oc3+oMqg/9vGyuZy7mRk1JwTPXelOReT72aVHa61gngz01ONqxgJoucSqxKjBibRbyUbKm4TkN4KNKog9Hg5e90PX8jvwwcDQYe6MapU2qBBAUtt25Ggmwg45q6nV2lnj8nmIoDxkCgDztLgv6uLlPgFZbn3+MNhnlCJg==');
     isSetup := false;
 
-    //high(navButtons[tab])is the actual button, the the next are the tab buttons when it's mouse-over'd
-    //7 out of 8 tabs open upwards, only powers opens downwards, see __openViaNavBar
-
-    self.navButtons[NAV_BUTTON_HERO] := grid(1, 6, 27, 27, 50, 36, point(602, 220 - (36 * 5)));
-    self.navButtons[NAV_BUTTON_CUSTOM] := grid(1, 1, 27, 27, 50, 36, point(652, 220));
-    self.navButtons[NAV_BUTTON_ADVENTURES] := grid(1, 3, 27, 27, 50, 36, point(702, 220 - (36 * 2)));
-    self.navButtons[NAV_BUTTON_POWERS] := grid(1, 7, 27, 27, 50, 36, point(752, 220));
-    self.navButtons[NAV_BUTTON_SOCIAL] := grid(1, 6, 27, 27, 50, 36, point(602, 258 - (36 * 5)));
-    self.navButtons[NAV_BUTTON_EXTRAS] := grid(1, 1, 27, 27, 50, 36, point(652, 258));
-    self.navButtons[NAV_BUTTON_GROUPING] := grid(1, 4, 27, 27, 50, 36, point(702, 258 - (36 * 3)));
-    self.navButtons[NAV_BUTTON_SETTINGS] := grid(1, 3, 27, 27, 50, 36, point(752, 258 - (36 * 2)));
-
     addOnTerminate('__freeGameTabs');
   end;
 end;
 {$ENDIF}
 
 {*
-__initTabs
-----------
+__initGameTabs
+---------------
 
 .. code-block:: pascal
 
-    procedure TRSGameTabs.__initTabs();
+    procedure TRSGameTabs.__initGameTabs();
 
 Initializes the individual gametabs, by loading their bitmap, nav button ID and
 nav box index.
@@ -215,119 +183,161 @@ Example:
 
 .. code-block:: pascal
 
-    gameTabs.__initTabs();
+    gameTabs.__initGameTabs();
 *}
 {$IFNDEF CODEINSIGHT}
-procedure TRSGameTabs.__initTabs();
+procedure TRSGameTabs.__initGameTabs();
 var
   i: integer;
 begin
+  // Setup Game Tabs
   setLength(self.tabs, 14);
 
-  with self.tabs[TAB_TASK] do
+  with self.tabs[TAB_ACHIEVEMENTS] do
   begin
     _bmp := bitmapFromString(3, 8, 'meJyzvvPN+s439oIetex2IAlEnHwagrKuQAarewqQ5HUIATG8jQREeNmNxDk8ZTg9ZOTTRGXSHSCk/lxJIAIANFkTWA==');
-    _navBarId := NAV_BUTTON_HERO;
-    _navBarBoxIndex := 3;
+    _navBarId := NAV_PRIMARY_HERO;
+    _navBarBoxIndex := 4;
   end;
 
   with self.tabs[TAB_STATS] do
   begin
     _bmp := bitmapFromString(10, 2, 'meJwLaRQOaRSK7ZTk5eE8ksV4IBGEDiYyAtmC/NzRrVJAlNQtz8/LtSuXYWsqEDECyV05TIIC3AAthhHR');
-    _navBarId := NAV_BUTTON_HERO;
-    _navBarBoxIndex := 0;
+    _navBarId := NAV_PRIMARY_HERO;
+    _navBarBoxIndex := 1;
   end;
 
   with self.tabs[TAB_BACKPACK] do
   begin
     _bmp := bitmapFromString(10, 2, 'meJzjktQQlLJTdu4AIgHJICCbi1lZwsjLJnuiqGIBkAtBSq5ZQARUAyRB6lOqgIoBZmsMmA==');
-    _navBarId := NAV_BUTTON_HERO;
-    _navBarBoxIndex := 1;
+    _navBarId := NAV_PRIMARY_HERO;
+    _navBarBoxIndex := 2;
   end;
 
   with self.tabs[TAB_EQUIPMENT] do
   begin
     _bmp := bitmapFromString(3, 12, 'meJzrbKrpbKpJTEnuhDG6+ycvXjIbIrJoYmdRRTWQDWQABYFsIMNSVw8oAmQrKagBGRA2BEG4QI1wE4CM+EhvIANoLADLWjI8');
-    _navBarId := NAV_BUTTON_HERO;
+    _navBarId := NAV_PRIMARY_HERO;
+    _navBarBoxIndex := 3;
+  end;
+
+  with self.tabs[TAB_QUESTS] do
+  begin
+    _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
+    _navBarId := NAV_PRIMARY_ADVENTURES;
+    _navBarBoxIndex := 1;
+  end;
+
+  with self.tabs[TAB_ACTIVITIES] do
+  begin
+    _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
+    _navBarId := NAV_PRIMARY_ADVENTURES;
     _navBarBoxIndex := 2;
   end;
 
   with self.tabs[TAB_PRAYER] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
-    _navBarId := NAV_BUTTON_POWERS;
+    _navBarId := NAV_PRIMARY_POWERS;
     _navBarBoxIndex := 1;
+  end;
+
+  with self.tabs[TAB_FAMILIAR] do
+  begin
+    _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
+    _navBarId := NAV_PRIMARY_POWERS;
+    _navBarBoxIndex := 2;
   end;
 
   with self.tabs[TAB_MAGIC] do
   begin
     _bmp := bitmapFromString(11, 5, 'meJzbHmmk37bMdtVl24ApmlI8HgrsqY7KHvJO1uGFqRHBbZb8tRVBHG0LODwzgMpEFQuACKiSh2cWK2uRipw6ULGnEadN9sTApgXKWdMEJIOAsoUlF4DK2Jm9IQZCUHBqroSRFyMDg6CUHdB8oBRcFmgLMkqz4QQiOHd7pBEAQGorag==');
-    _navBarId := NAV_BUTTON_POWERS;
+    _navBarId := NAV_PRIMARY_POWERS;
     _navBarBoxIndex := 3;
   end;
 
    with self.tabs[TAB_MELEE] do
   begin
     _bmp := bitmapFromString(9, 4, 'meJyz9vJRVxRXlhUSFuPbOWfm318/5h64WpCb6+7mWnjkpVV0iZS44NQZs16+/wAR93B3k5WTUdC10G9bNm/DFrh6oLiSrIiKjICYMBevlHrxiXc53/8Gp4LEZSSFpEU4lSR5AM6bKxQ=');
-    _navBarId := NAV_BUTTON_POWERS;
+    _navBarId := NAV_PRIMARY_POWERS;
     _navBarBoxIndex := 4;
   end;
 
   with self.tabs[TAB_RANGED] do
   begin
     _bmp := bitmapFromString(2, 8, 'meJyzyFmrpaEpm9CpbBrEbZfNY+HGLxYkoGgAZCuaugFJUUlXYZlcISEDJdscfn4+ABAACfE=');
-    _navBarId := NAV_BUTTON_POWERS;
+    _navBarId := NAV_PRIMARY_POWERS;
     _navBarBoxIndex := 5;
   end;
 
   with self.tabs[TAB_DEFENSIVE] do
   begin
     _bmp := bitmapFromString(13, 3, 'meJwryM2ta6iqrQgSkAzSVD5aWHJh37kHk2edE5b2EZbyBTIg3AKwMg93N1bWIguXixDxv79+AEkI4+X7D0C9QGVTZ8wCKgOaxsMzCygCUQmUBSKIUUBBAB0HQt0=');
-    _navBarId := NAV_BUTTON_POWERS;
+    _navBarId := NAV_PRIMARY_POWERS;
     _navBarBoxIndex := 6;
   end;
 
   with self.tabs[TAB_FRIENDS] do
   begin
     _bmp := bitmapFromString(8, 8, 'meJyrm7a6btrqaftuAVF5x0QLjzTWthimrfVwwajKydUrjwK58lZWQCkgA8KFKJi69wazJCd7tHVS52oIgsg6ufiyeOqwFToC2UATQKi4Rs4qCGI4UNy1cgpEPVwQSALFtcIzlGxzrJOageJALlAQgoB2zVm7FaieR9kSaB1EMRABAFrsUf8=');
-    _navBarId := NAV_BUTTON_SOCIAL;
+    _navBarId := NAV_PRIMARY_SOCIAL;
     _navBarBoxIndex := 0;
   end;
 
   with self.tabs[TAB_FRIENDS_CHAT] do
   begin
     _bmp := bitmapFromString(6, 8, 'meJwzmnLCaMqJ1Pf/THu3sEiKsbbFWH18b7n5qfXZj/xiQYwMDOzR1tan3gJF9GunM5ubsBU6AtUAZWWqJnNEZQDZTFvrgYJABXAukAQioIhsQidQO4QL0rXyFI+yJUQEqAWIgGYCrQAaCxSEIADzcDIO');
-    _navBarId := NAV_BUTTON_SOCIAL;
+    _navBarId := NAV_PRIMARY_SOCIAL;
     _navBarBoxIndex := 1;
   end;
 
   with self.tabs[TAB_CLAN_CHAT] do
   begin
     _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
-    _navBarId := NAV_BUTTON_SOCIAL;
+    _navBarId := NAV_PRIMARY_SOCIAL;
     _navBarBoxIndex := 2;
+  end;         
+
+  with self.tabs[TAB_GROUP] do
+  begin
+    _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
+    _navBarId := NAV_PRIMARY_SOCIAL;
+    _navBarBoxIndex := 3;
+  end;            
+
+  with self.tabs[TAB_GRAPHS] do
+  begin
+    _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
+    _navBarId := NAV_PRIMARY_RUNEMETRICS;
+    _navBarBoxIndex := 2;
+  end;
+
+  with self.tabs[TAB_DROPS] do
+  begin
+    _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
+    _navBarId := NAV_PRIMARY_RUNEMETRICS;
+    _navBarBoxIndex := 3;
   end;
 
   with self.tabs[TAB_NOTES] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJwz0VWyNlaztbPRzFgqb9Aq65AqKi6goiS/+9bj9LlnNQJbTrz+zsbLoWNoAGRA0L9///h4OICCxl5pEC6QjEvPT++YxsjAYOPsufLVT4g4EMAF1xy5BwALKjWC');
-    _navBarId := NAV_BUTTON_SETTINGS;
-    _navBarBoxIndex := 0;
+    _navBarId := NAV_PRIMARY_SETTINGS;
+    _navBarBoxIndex := 1;
   end;
 
   with self.tabs[TAB_MUSIC] do
   begin
     _bmp := bitmapFromString(6, 8, 'meJyb/+Jb3bTVTi6+LlGpUZWTkzpXT9t3C8gWExOSV7UAknxc/NUrjwJFgCRQCiILVAkk57/4tu81CEUV1wBVAgWBIkAFQAOBsvJWVkA2UJeSghojAwNQDcQEiAhQPZABQfl7nkIYQO0ANDdHLQ==');
-    _navBarId := NAV_BUTTON_SETTINGS;
-    _navBarBoxIndex := 1;
+    _navBarId := NAV_PRIMARY_SETTINGS;
+    _navBarBoxIndex := 2;
   end;
-
-  self.isSetup := true;
 
   for i := 0 to high(self.tabs) do
     setBitmapName(self.tabs[i]._bmp, 'Gametab Bitmap['+toStr(i)+']');
 
   print('TRSGameTab.__initTabs(): Setup gametab properties', TDebug.SUB);
+  self.isSetup := true;
 end;
 {$ENDIF}
 
@@ -493,7 +503,7 @@ var
   tpa: TPointArray;
 begin
   if (not self.isSetup) then
-    self.__initTabs();
+    self.__initGameTabs();
 
   result := [-1, -1, -1, -1];
 
@@ -625,7 +635,7 @@ Example:
 function TRSGameTabs._findTab(var p: TPoint; tab: integer; searchBox: TBox): boolean;
 begin
   if (not self.isSetup) then
-    self.__initTabs();
+    self.__initGameTabs();
 
   result := findBitmapToleranceIn(self.tabs[tab]._bmp, p.x, p.y, searchBox, 50);
 end;
@@ -746,54 +756,6 @@ begin
   end;
 end;
 
-{*
-__openViaNavBar
----------------
-
-.. code-block:: pascal
-
-    function TRSGameTabs.__openViaNavBar(tab: integer): boolean;
-
-Helper function for TRSGametabs.openTab(). Opens the gametab **tab** via the
-navigation bar and moves the mouse to close.
-
-.. note::
-
-    - by Olly
-    - Last Updated: 27 November 2017 by Thomas
-
-Example:
-
-.. code-block:: pascal
-
-    gameTabs.__openViaNavbar(TAB_BACKPACK);
-*}
-{$IFNDEF CODEINSIGHT}
-function TRSGameTabs.__openViaNavBar(tab: integer): boolean;
-var
-  p: TPoint;
-  b: TBox;
-  i: integer;
-begin
-  if not (self.tabs[tab]._navBarID = NAV_BUTTON_POWERS) then   //7 out of 8 tabs open upwards, only powers opens downwards
-    i := (high(self.navButtons[self.tabs[tab]._navBarID]));
-
-  mouseBox(self.navButtons[self.tabs[tab]._navBarID][i], MOUSE_MOVE); // hover over the nav button
-  wait(275 + random(250));
-  mouseBox(self.navButtons[self.tabs[tab]._navBarID][self.tabs[tab]._navBarBoxIndex], MOUSE_LEFT, MOUSE_ACCURATE);
-  wait(20 + random(200));
-
-  b := self.navButtons[self.tabs[tab]._navBarID][0];
-
-  if (random(2) = 1) then // move the mouse to the side so the menu closes
-    p := point(b.x1 - 8 - random(5), b.y1 + randomRange(-10, 50))
-  else
-    p := point(b.x2 + 8 + random(5), b.y1 + randomRange(-10, 50));
-
-  mouse(p);
-end;
-{$ENDIF}
-
 (*
 openTab
 -------
@@ -820,7 +782,7 @@ function TRSGameTabs.openTab(tab: integer): boolean;
 var
   b: TBox;
 begin
-  if (not inRange(tab, TAB_TASK, TAB_MUSIC)) then // check tab is vaild
+  if (not inRange(tab, TAB_ACHIEVEMENTs, TAB_MUSIC)) then // check tab is vaild
   begin
     print('TRSGameTabs.openTab('+toStr(tab)+'): The tab isnt valid!, result = ' + toStr(result), TDebug.ERROR);
     exit(false);
@@ -849,7 +811,7 @@ begin
   end;
 
   print('Opening tab via gametab navigation bar');
-  self.__openViaNavBar(tab);
+  //Navigation.Open(tab);
 
   result := self.waitTabActive(tab, 4000 + random(1000));
 
@@ -903,5 +865,3 @@ end;
 begin
   gameTabs.__init();
 end;
-
-{$f+}

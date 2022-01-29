@@ -1,0 +1,496 @@
+(*
+Navigation
+==========
+
+The navigation file holds any functions related to navigation..
+
+*)
+
+(*
+Consts, Types, Vars
+~~~~~~~~~~~~~~~~~~~
+
+The following constants, types and variables are used throughout the chatBox methods.
+
+**const Nav Buttons**
+
+Constants that represent the buttons on the navigation pane. These buttons
+contain the individual gametab buttons.
+
+    * NAV_PRIMARY_HERO
+    * NAV_PRIMARY_CUSTOM
+    * NAV_PRIMARY_ADVENTURES
+    * NAV_PRIMARY_POWERS
+    * NAV_PRIMARY_SOCIAL
+    * NAV_PRIMARY_EXTRAS
+    * NAV_PRIMARY_RUNEMETRICS
+    * NAV_PRIMARY_SETTINGS
+
+*)
+
+type
+  TNavPrimaryButton = (
+    NAV_PRIMARY_HERO,
+    NAV_PRIMARY_CUSTOM,
+    NAV_PRIMARY_ADVENTURES,
+    NAV_PRIMARY_POWERS,
+    NAV_PRIMARY_SOCIAL,
+    NAV_PRIMARY_EXTRAS,
+    NAV_PRIMARY_RUNEMETRICS,
+    NAV_PRIMARY_SETTINGS
+  );  
+
+type
+  TNavSecondaryButton = (
+    // Hero Buttons
+    NAV_HERO_STATS,
+    NAV_HERO_BACKPACK,
+    NAV_HERO_EQUIPMENT,
+    NAV_HERO_ACHIEVEMENTS,
+
+    // Adventure Buttons
+    NAV_ADVENTURE_QUESTS,
+    NAV_ADVENTURE_ACTIVITIES,
+
+    // Power Buttons
+    NAV_POWER_PRAYER,
+    NAV_POWER_FAMILIAR,
+    NAV_POWER_MAGIC,
+    NAV_POWER_MELEE,
+    NAV_POWER_RANGED,
+    NAV_POWER_DEFENSIVE,
+
+    // Community Buttons
+    NAV_COMMUNITY_ALL_CHAT,
+    NAV_COMMUNITY_EMOTES,
+    NAV_COMMUNITY_PRIVATE_CHAT,
+    NAV_COMMUNITY_FRIENDS_LIST,
+    NAV_COMMUNITY_FRIENDS_CHAT,
+    NAV_COMMUNITY_FRIENDS_CHAT_LIST,
+    NAV_COMMUNITY_CLAN_CHAT,
+    NAV_COMMUNITY_CLAN_CHAT_LIST,
+    NAV_COMMUNITY_GUEST_CLAN_CHAT,
+    NAV_COMMUNITY_TRADE_AND_ASSISTANCE,
+    NAV_COMMUNITY_GROUP_CHAT,
+    NAV_COMMUNITY_GROUP_CHAT_LIST,
+
+    // RuneMetrics Buttons
+    NAV_RUNEMETRICS_METRICS,
+    NAV_RUNEMETRICS_GRAPHS,
+    NAV_RUNEMETRICS_DROPS,
+
+    // Settings Buttons
+    NAV_SETTINGS_NOTES,
+    NAV_SETTINGS_MUSIC
+  );
+
+    
+{*
+**type _TRSNavButton**
+
+Internal type which holds individual navigation button properties
+*}
+type
+  _TRSNavButton = record
+    _bmp, _columnSize, _rowSize: integer;    // bitmap of the icon, popup column and row sizes
+    _previousLocation: TBox; // To save compute time, save the box the bitmap was found in to search next time
+  end;  
+
+type TRSNavigation = record(TRSInterface)
+    NavButtons: array of _TRSNavButton;  
+    GridWidth, GridHeight, GridDiffX, GridDiffY: Integer;        
+    IsSetup: boolean;           
+  end;
+
+(*
+**var Navigation**
+
+.. code-block:: pascal
+
+    var
+      Navigation: TRSNavigation;
+
+A variable through which scripters can access the TRSNavigation type methods.
+
+*)
+var
+  Navigation: TRSNavigation;
+
+{*
+__init
+------
+
+.. code-block:: pascal
+
+    procedure TRSNavigation.__init();
+
+Initializes the TRSNavigation.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    Navigation.__init();
+
+*}
+{$IFNDEF CODEINSIGHT}
+procedure TRSNavigation.__init();
+begin
+  with self do
+  begin
+    name := 'RS Navigation';
+    ID := ID_INTERFACE_GAMETABS;
+    parentID := -1;
+    isStatic := false;
+    isSetup := false;
+
+    self.GridWidth := 27;
+    self.GridHeight := 27;
+    self.GridDiffX := 35;
+    self.GridDiffY := -36;
+
+    //high(navButtons[tab])is the actual button, the the next are the tab buttons when it's mouse-over'd
+    //7 out of 8 tabs open upwards, only powers opens downwards, see __openViaNavBar
+
+    // self.navButtons[Ord(NAV_PRIMARY_HERO)] := grid(1, 6, 27, 27, 50, 36, point(602, 220 - (36 * 5)));
+    // self.navButtons[Ord(NAV_PRIMARY_CUSTOM)] := grid(1, 1, 27, 27, 50, 36, point(652, 220));
+    // self.navButtons[Ord(NAV_PRIMARY_ADVENTURES)] := grid(1, 3, 27, 27, 50, 36, point(702, 220 - (36 * 2)));
+    // self.navButtons[Ord(NAV_PRIMARY_POWERS)] := grid(1, 7, 27, 27, 50, 36, point(752, 220));
+    // self.navButtons[Ord(NAV_PRIMARY_SOCIAL)] := grid(1, 6, 27, 27, 50, 36, point(602, 258 - (36 * 5)));
+    // self.navButtons[Ord(NAV_PRIMARY_EXTRAS)] := grid(1, 1, 27, 27, 50, 36, point(652, 258));
+    // self.navButtons[Ord(NAV_PRIMARY_RUNEMETRICS)] := grid(1, 4, 27, 27, 50, 36, point(702, 258 - (36 * 3)));
+    // self.navButtons[Ord(NAV_PRIMARY_SETTINGS)] := grid(1, 3, 27, 27, 50, 36, point(752, 258 - (36 * 2)));
+
+    addOnTerminate('__freeNavigation');
+  end;
+end;
+{$ENDIF}
+
+{*
+__initInterface
+---------------
+
+.. code-block:: pascal
+
+    procedure TRSNavigation.__initInterface();
+
+Initializes the navigation bar by the proper bitmaps and initializing the previous locations.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    gameTabs.__initInterface();
+*}
+{$IFNDEF CODEINSIGHT}
+procedure TRSNavigation.__initNavigation();
+var
+  i: integer;
+begin
+  setLength(self.NavButtons, 8);
+
+  with self.NavButtons[ord(NAV_PRIMARY_HERO)] do
+  begin
+    _bmp := BitmapFromString(14, 14, 'meJwBTAKz/QsCRW5ngszIv9jWzd3cy/b03P//9Pvsz7Gle6ymiMnDtLColnNrdhMKSjIpYlBHcVxUdVNKdEE2Y3ZwgKmonpiUg2lhYTovWVFIclJJak1FaDkwZkI5bDwyazswa0M3cUU2eFRJfIaGg4aFcmRafkM0fEc7dkA1cTsxaz42aTszZz41aUQ5bUxAdEg6dWRZiJ2cl5STfWtggUg7e09EeEc9cD82ajgwZDoyZkA3bEQ6bkk+cTstbIB4mbW2qpqXgnpxgkM2dk1CdkQ6bj00aTUuYjgxZT41akI4bT80a0g+csPBxbq7spqWiZyWhkxCbEM3c0A3azoyZjcvZDIrXzkwZEA3azkvaU9GdNfX1Ly8tp6aj6ahiUxDZTcsazsyZzoxZjcwZTApXjMsYDgwZS8lYE5Hc9vb2cPDvKWhlauljklAYC8mZToyZjgwZTQtYiokWTApXjMsYSIZVFJMdejo48fGwKumm7Krkk9IYSsiYjcvZDQtYi4nXB4ZUCwmWzAoXRgPTV9afvn58MrIw7Ktobqzl1dQYCIbWzQtYi0oXSAcUgAAMhwXTykjWAsEQnZyj////c7MyLm0p763nGJcYhoTUigiWB8aUQAAM1ZVfAAAMg4LQwAAPJybrf///9LSzcC7rb62nXJrZxYSTBANRwAAMUVEbnBwdmxrigYFPAAAI7e4w////9nY08fCtMG4oXp0aAAAMgAAOWJhg4KCixUPDEhIS359kx4dQnt7k/z8/ODf2tDLvce+pVpUVR0cS3V1j11eYxENDSNQ8ew=');  
+    _columnSize := 1;
+    _rowSize := 5;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_CUSTOM)] do
+  begin
+    _bmp := BitmapFromString(3, 18, 'meJwBogBd/5qzyZ+xxrG5zFaDoEeIqVWgwUJpiQA6ZgBlj1l+nRhBZQEiSQVZghdrkA1cggAsSxBObBVifRFNZRA9SBM6OxJASw8uKxAmHwkdKgkRGQwMFggnQw0NGA8PHQxbgwkkPwwTJQ9slA1jiwtOdAlagg5mjg1jjABKdA1agwxUex9xkwFkkQdHbyB5lABIbQZDaCNcZVt2hlJ3kHB8d5qss5Kksn99MmQ=');
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_ADVENTURES)] do
+  begin
+    _bmp := BitmapFromString(3, 18, 'meJwzCCsvmLJ7/eGnQHTozFsIiZVxavlMILmpf8bJlhAg49yC8guz44GMB8tKgez1u4+vTnCaH6ANlAWKQ6TguiDmwK2oPn5vzrGXQEbVuotANhB5VPbmL9xWtfa8evYCRf88g4haNqNwWY9kIBsAcWFq4w==');                                                         
+    _columnSize := 1;
+    _rowSize := 3;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_POWERS)] do
+  begin
+    _bmp := BitmapFromString(4, 15, 'meJybFe44JyRifmjkksjc1TEFJ6pKjiycCkQnls04sXTG8SXTT1WXXl5w8OSyGWdry1ZG5z9fPPNew4LjKRX9poHfzk8CcoHsCTD2ubrypRHRP5/sfnh+zbPFM4EGAhkg8dryxeFRQDXnFpRD2CDBBeXLI6P7TAPO15UfSy6faBqYouCyPy12X1pMv2lAsoIz0KhlsY5ABUHiFotjHJfEOK6IzlsalQsAGB9i4A==');
+    _columnSize := 1;
+    _rowSize := 7;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_SOCIAL)] do
+  begin
+    _bmp := BitmapFromString(3, 14, 'meJwBfgCB/06NLVCaMk+bLU2BKE2NLT50EkZ5J0R5Jkt4GUVyJEJ0Fl+JWkJjG016KSxQjTxiC3ell7zO7UhrIU92t5u54UpoN1FttlFusElfNVVpqFpqpkdeK1ZqplZookFSFlJonFprqzY0AkFTV11qtCEdBDA4FDE+byQfCSQhAjVHNld2K80=');
+    _columnSize := 2;
+    _rowSize := 7;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_EXTRAS)] do
+  begin
+    _bmp := BitmapFromString(3, 18, 'meJyTOfORtW4ZN+Ni/imnlXWLBBm+MHLqc6ZXsTHVMvE4swRPBDK4ferZjMKBUkAuUBComDN9PlAZkA1hgLXMB6qBaAGymbhlgYi7ZidQkMWiAUgCBYFWAI1iN84HigMRs1yk4PJTQEGgFMgNNTtBGnmc4QhiMgBlzSkw');                                     
+    _previousLocation := [0, 0, 0, 0];
+  end;
+  
+  with self.NavButtons[ord(NAV_PRIMARY_RUNEMETRICS)] do
+  begin
+    _bmp := BitmapFromString(3, 6, 'meJzzkF5hoXfIVnlT5rofy978rXv649FfELj+5+/LP7+B7DN//hpM/2U56bvHvr+WoldNuffLal0AAO6MJCI=');
+    _columnSize := 1;
+    _rowSize := 4;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+
+  with self.NavButtons[ord(NAV_PRIMARY_SETTINGS)] do
+  begin
+    _bmp := BitmapFromString(15, 15, 'meJx1kjFIQlEUhi1oiKhwDSWdclIJh+f0ECqyhgdaoFCguDSEOYahbvGWWp9DJIHkFLTEG0JoCIJKGoKmdp2irbVPfnhY1uVwOPee75z73/OeuX9Se/rYuXpcMKzJmSA+UT6VxbIVf8gMW+XM5cPe/ftG3akNvtLN7sR0LLCc2nZuOSw8f+KxovvKCeXB9VK+88aWKsjFlZwwTjj3UnguJctFxBRiIsnGc3W2ZOMlmxLxm8ediHlIPO+P4kWC+UZWKLUrXk1Qix7J4yG+sbV2dC4YGclGG09bqsZJLTU3Di6A0QNM8Ce5Wj3LNl/UOW27wMj4rzNtSWHAKkEwRvCLtFp3YDDci9GTd2mkNDGqLY/MOD2ReATjh3Ne2uI7ErDV55D9IG1XA6c/40W5+o8aDGS0cSOdHo8YPhklejLGoXoWr/v8IZoDN+I1Sd6Il4FJpwY1NTtH9htxORO0');  
+    _columnSize := 1;
+    _rowSize := 3;
+    _previousLocation := [0, 0, 0, 0];
+  end;
+
+  for i := 0 to high(self.NavButtons) do
+    setBitmapName(self.NavButtons[i]._bmp, 'Navigation Bitmap['+toStr(i)+']');
+
+  print('TRSGameTab.__initTabs(): Setup navigation properties', TDebug.SUB);
+
+  self.isSetup := true;
+end;
+{$ENDIF}
+
+{*
+__freeGameTabs
+--------------
+
+.. code-block:: pascal
+
+    procedure __freeGameTabs();
+
+Frees all the gametab's bitmaps. Called on script termination.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    addOnTerminate('__freeGameTabs');
+*}
+{$IFNDEF CODEINSIGHT}
+procedure __freeNavigation();
+var
+  i: integer;
+begin
+  print('Freeing navigation bitmaps...');
+
+  for i := 0 to high(Navigation.NavButtons) do
+    freeBitmap(Navigation.NavButtons[i]._bmp);
+end;
+{$ENDIF}  
+
+
+
+(*
+GetNavBarArea
+-------------
+
+.. code-block:: pascal
+
+    function TRSGameTabs.GetNavBarArea(): TBox;
+
+Returns the bounds of the navigation bar. If not found, will return -1.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    NavBar := gameTabs.GetNavBarArea();
+*)
+function TRSNavigation.GetNavBarArea(): TBox;
+var
+  msBounds: TBox;
+  p1, p2: TPoint;
+begin
+  if (not self.isSetup) then
+    self.__initNavigation();
+
+  result := [-1, -1, -1, -1];
+  if findBitmapToleranceIn(self.NavButtons[NAV_PRIMARY_HERO]._bmp, p1.x, p1.y, self.NavButtons[NAV_PRIMARY_HERO]._previousLocation, 30) and findBitmapToleranceIn(self.NavButtons[NAV_PRIMARY_SETTINGS]._bmp, p2.x, p2.y, self.NavButtons[NAV_PRIMARY_SETTINGS]._previousLocation, 30) then
+  begin 
+    result := [p1.X - 12, p1.y - 12, p2.X + 27, p2.y + 27];
+  end else begin
+    msBounds := Mainscreen.GetBounds();
+    
+    if findBitmapToleranceIn(self.NavButtons[NAV_PRIMARY_HERO]._bmp, p1.x, p1.y, msBounds, 30) and findBitmapToleranceIn(self.NavButtons[NAV_PRIMARY_SETTINGS]._bmp, p2.x, p2.y, [p1.X, p1.Y - 25, msBounds.X2, msBounds.Y2], 30) then
+    begin
+      self.NavButtons[NAV_PRIMARY_HERO]._previousLocation := [p1.x - 25, p1.y - 25, p1.x + 25, p1.y + 25];
+      self.NavButtons[NAV_PRIMARY_SETTINGS]._previousLocation := [p2.x - 25, p2.y - 25, p2.x + 25, p2.y + 25];
+      result := [p1.X - 12, p1.y - 12, p2.X + 27, p2.y + 27];
+    end else 
+      print('TRSNavigation.GetNavBarArea(): Could not find Navigation bar.');
+  end;
+end; 
+
+{*
+__openViaNavBar
+---------------
+
+.. code-block:: pascal
+
+    function TRSNavigation.Open(tab: integer): boolean;
+
+Opens the specified interface via the navigation bar and moves the mouse to close.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    Navigation.Open(NAV_BUTTON_BACKPACK);
+*}
+
+
+{$IFNDEF CODEINSIGHT}
+function TRSNavigation.__GetButtonBounds(primaryButton: TNavPrimaryButton): TBox;
+var
+    p: TPoint;
+    b: TBox;
+begin
+    result := [-1, -1, -1, -1];
+
+    b := self.GetNavBarArea();
+
+    if FindBitmapToleranceIn(self.NavButtons[Ord(primaryButton)]._bmp, p.X, p.Y, b, 30) then
+    begin
+        result := [p.X - 5, p.Y - 5, p.X + 19, p.Y + 19];
+    end else
+        print('TRSNavigation.__GetButtonBounds(): Could not find primary navigation button. Check to see if the bitmaps are out of date.');
+end;
+{$ENDIF}
+
+{$IFNDEF CODEINSIGHT}
+function TRSNavigation.__HoverPrimary(primaryButton: TNavPrimaryButton): boolean;
+var
+    p: TPoint;
+    b: TBox;
+begin
+    b := self.__GetButtonBounds(primaryButton);
+
+    if (b = [-1, -1, -1, -1]) then
+        Exit(false);
+
+    MouseBox(b);
+    result := true;
+end;
+{$ENDIF}
+
+function TRSNavigation.Open(primaryButton: TNavPrimaryButton): boolean;
+var
+  p1: TPoint;
+  b: TBox;
+  i: integer;
+begin
+    if (Navigation.__HoverPrimary(primaryButton)) then
+    begin
+        FastClick(MOUSE_LEFT);
+        result := true;
+    end;
+end;
+
+function TRSNavigation.Open(secondaryButton: TNavSecondaryButton): boolean; overload;
+var
+    primaryButton: TNavPrimaryButton;
+    secondaryIndex: Integer;
+    primaryButtonBounds: TBox;
+    secondaryButtonArray: TBoxArray;
+begin
+    case (secondaryButton) of
+        NAV_HERO_STATS,
+        NAV_HERO_BACKPACK,
+        NAV_HERO_EQUIPMENT,
+        NAV_HERO_ACHIEVEMENTS:
+        begin
+            primaryButton := NAV_PRIMARY_HERO;
+            secondaryIndex := Ord(secondaryButton) + 1;
+        end;
+
+        NAV_ADVENTURE_QUESTS,
+        NAV_ADVENTURE_ACTIVITIES:
+        begin
+            primaryButton := NAV_PRIMARY_ADVENTURES;
+            secondaryIndex := Ord(secondaryButton) - 3;
+        end;
+        
+        NAV_POWER_PRAYER,
+        NAV_POWER_FAMILIAR,
+        NAV_POWER_MAGIC,
+        NAV_POWER_MELEE,
+        NAV_POWER_RANGED,
+        NAV_POWER_DEFENSIVE:
+        begin
+            primaryButton := NAV_PRIMARY_POWERS;
+            secondaryIndex := Ord(secondaryButton) - 5;
+        end;
+        
+        NAV_COMMUNITY_ALL_CHAT,
+        NAV_COMMUNITY_EMOTES,
+        NAV_COMMUNITY_PRIVATE_CHAT,
+        NAV_COMMUNITY_FRIENDS_LIST,
+        NAV_COMMUNITY_FRIENDS_CHAT,
+        NAV_COMMUNITY_FRIENDS_CHAT_LIST,
+        NAV_COMMUNITY_CLAN_CHAT,
+        NAV_COMMUNITY_CLAN_CHAT_LIST,
+        NAV_COMMUNITY_GUEST_CLAN_CHAT,
+        NAV_COMMUNITY_TRADE_AND_ASSISTANCE,
+        NAV_COMMUNITY_GROUP_CHAT,
+        NAV_COMMUNITY_GROUP_CHAT_LIST:
+        begin
+            primaryButton := NAV_PRIMARY_SOCIAL;
+            secondaryIndex := Ord(secondaryButton) - 10;
+        end;
+        
+        NAV_RUNEMETRICS_METRICS,
+        NAV_RUNEMETRICS_GRAPHS,
+        NAV_RUNEMETRICS_DROPS: 
+        begin
+            primaryButton := NAV_PRIMARY_RUNEMETRICS;
+            secondaryIndex := Ord(secondaryButton) - 23;
+        end;
+        
+        
+        NAV_SETTINGS_NOTES,
+        NAV_SETTINGS_MUSIC:
+        begin
+            primaryButton := NAV_PRIMARY_SETTINGS;
+            secondaryIndex := Ord(secondaryButton) - 26;
+        end;
+    end;
+
+    primaryButtonBounds := Navigation.__GetButtonBounds(primaryButton);
+    SecondaryButtonArray := grid(self.NavButtons[primaryButton]._columnSize, self.NavButtons[primaryButton]._rowSize, self.GridWidth, self.GridHeight, self.GridDiffX, self.GridDiffY, primaryButtonBounds.GetMiddle);
+    
+    MouseBox(primaryButtonBounds);
+    Wait(RandomRange(250, 350));
+    MouseBox(SecondaryButtonArray[secondaryIndex], MOUSE_LEFT);
+end;
+
+begin
+  Navigation.__init();
+end;    

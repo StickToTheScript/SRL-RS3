@@ -46,12 +46,14 @@ Example:
     See mouse().
 *}
 {$IFDEF NAS}
-procedure MoveMouse(X, Y: Int32); override;
-begin
-  Overlay.Bitmap.drawClear(0);
-  Overlay.Bitmap.Rectangle([X-2, Y-2, X+2, Y+2], 255);
-  inherited;
-end;
+  {$IFDEF DRAW_MOUSE}
+  procedure MoveMouse(X, Y: Int32); override;
+  begin
+    Overlay.Bitmap.drawClear(0);
+    Overlay.Bitmap.Rectangle([X-2, Y-2, X+2, Y+2], 255);
+    inherited;
+  end;
+  {$ENDIF}
 {$ENDIF}
 
 {$f-}

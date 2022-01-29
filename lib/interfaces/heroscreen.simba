@@ -228,7 +228,7 @@ begin
 
   timeOut := GetTickCount() + waitTime + random(400);
 
-  mouseBox(gameTabs.navButtons[NAV_BUTTON_HERO][0], MOUSE_LEFT);
+  Navigation.Open(NAV_PRIMARY_HERO);
 
   wait(randomRange(750, 1250));
 
