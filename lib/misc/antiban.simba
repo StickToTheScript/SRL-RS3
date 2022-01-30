@@ -37,7 +37,8 @@ Example:
 *)
 procedure randomRClickItem();
 var
-  t, i: integer;
+  t: TGameTab;
+  i: integer;
   slots: TIntegerArray;
 begin
   t := gameTabs.getActiveTab();
@@ -434,7 +435,7 @@ Switches to a random gametab, Will return to the original tab if
 .. note::
 
     - by Olly
-    - Last Updated: 19 Novemeber 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -444,7 +445,7 @@ Example:
 *)
 procedure randomGameTab(returnToOriginal: boolean = false);
 var
-  tab, t: Integer;
+  tab, t: TGameTab;
 begin
   if (not isLoggedIn()) then
     exit();
@@ -452,8 +453,8 @@ begin
   t := gameTabs.getActiveTab();
 
   repeat
-    tab := random(high(gameTabs.tabs));
-  until (tab <> t) and (tab <> TAB_ACHIEVEMENTS); // make sure it's a different tab
+    tab := TGameTab(random(high(gameTabs.tabs)));
+  until (tab <> t);
 
   gameTabs.openTab(tab);
   wait(randomRange(300, 1000));
@@ -678,7 +679,7 @@ Hovers the skill 'skill'.
 .. note::
 
     - by Olly
-    - Last Updated: 23 October 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -688,7 +689,7 @@ Example:
 *)
 procedure hoverSkill(skill: integer);
 var
-  t: integer;
+  t: TGameTab;
 begin
   t := gameTabs.getActiveTab();
   gameTabs.openTab(TAB_STATS);
@@ -737,7 +738,7 @@ Specify the maximum scroll amount via maxScrollAmount.
 .. note::
 
     - by Clarity
-    - Last Updated: 20 January 2015 by Clarity
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -747,7 +748,7 @@ Example:
 *)
 function browseSkillMenu(skill: integer; maxScrollAmount: integer = 10): boolean;
 var
-  t: integer;
+  t: TGameTab;
 begin
   print('browseSkillMenu()', TDebug.HEADER);
 
@@ -783,7 +784,7 @@ Hovers an online friend.
 .. note::
 
     - by Olly
-    - Last Updated: 23 October 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -795,7 +796,8 @@ procedure hoverOnlineFriend();
 var
   tpa: TPointArray;
   atpa: T2DPointArray;
-  r, t: integer;
+  r: integer;
+  t: TGameTab;
   b, tabArea: TBox;
 begin
   t := gameTabs.getActiveTab();

@@ -401,20 +401,17 @@ begin
 end;
 {$ENDIF}
 
-function TRSNavigation.Open(primaryButton: TNavPrimaryButton): boolean;
+Procedure TRSNavigation.Open(primaryButton: TNavPrimaryButton);
 var
   p1: TPoint;
   b: TBox;
   i: integer;
 begin
     if (Navigation.__HoverPrimary(primaryButton)) then
-    begin
         FastClick(MOUSE_LEFT);
-        result := true;
-    end;
 end;
 
-function TRSNavigation.Open(secondaryButton: TNavSecondaryButton): boolean; overload;
+Procedure TRSNavigation.Open(secondaryButton: TNavSecondaryButton); overload;
 var
     primaryButton: TNavPrimaryButton;
     secondaryIndex: Integer;

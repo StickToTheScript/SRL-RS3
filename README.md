@@ -27,8 +27,6 @@ Below is a list of broken interface functions:
   - All Functions
 - Chatbox
   - getTextOnLine
-- Game Tab
-  - All Functions
 - Lobby
   - getCurrentTab
   - openTab

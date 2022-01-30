@@ -29,38 +29,41 @@ Constants that represent each gametab.
     * TAB_MUSIC
 
 *)
-const
-  // Hero Tabs
-  TAB_STATS = 0;
-  TAB_BACKPACK = 1;
-  TAB_EQUIPMENT = 2;
-  TAB_ACHIEVEMENTS = 3;
+type
+  TGameTab = (
+    // Hero Tabs
+    TAB_STATS,
+    TAB_BACKPACK,
+    TAB_EQUIPMENT,
 
-  // Adventure Tabs
-  TAB_QUESTS = 4;
-  TAB_ACTIVITIES = 5;
+    // Adventure Tabs
+    TAB_QUESTS,
+    TAB_ACTIVITIES,
 
-  // Power Tabs
-  TAB_PRAYER = 6;
-  TAB_FAMILIAR = 7;
-  TAB_MAGIC = 8;
-  TAB_MELEE = 9;
-  TAB_RANGED = 10;
-  TAB_DEFENSIVE = 11;
+    // Power Tabs
+    TAB_PRAYER,
+    TAB_FAMILIAR,
+    TAB_MAGIC,
+    TAB_MELEE,
+    TAB_RANGED,
+    TAB_DEFENSIVE,
 
-  // Community Tabs
-  TAB_FRIENDS = 12;
-  TAB_FRIENDS_CHAT = 13;
-  TAB_CLAN_CHAT = 14;
-  TAB_GROUP = 15;
+    // Community Tabs
+    TAB_FRIENDS,
+    TAB_FRIENDS_CHAT,
+    TAB_CLAN_CHAT,
+    TAB_GROUP,
 
-  // RuneMetrics Tabs
-  TAB_GRAPHS = 16;
-  TAB_DROPS = 17;
+    // RuneMetrics Tabs
+    TAB_GRAPHS,
+    TAB_DROPS,
 
-  // Settings Tabs
-  TAB_NOTES = 18;
-  TAB_MUSIC = 19;
+    // Settings Tabs
+    TAB_NOTES,
+    TAB_MUSIC,
+
+    TAB_NONE // Only used as a return value for when no tab is open/active
+  )
 
 {*
 **type _TRSGameTab**
@@ -70,8 +73,7 @@ Internal type which holds individual tab properties
 type
   _TRSGameTab = record
     _bmp: integer;    // bitmap of the tab (used for switching between tabs)
-    _navBarID: TNavPrimaryButton; // the constant representing the nav bar
-    _navBarBoxIndex: integer; // the index of the box of the nav bar (when it's moused over)
+    _secondaryNavButton: TNavSecondaryButton; // the secondary navigation button (when it's moused over)
   end;
 
 (*
@@ -134,7 +136,7 @@ Initializes the TRSGameTabs.
 .. note::
 
     - by Coh3n
-    - Last Updated: 26 July 2013 by Coh3n
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -177,7 +179,7 @@ nav box index.
 .. note::
 
     - by Coh3n
-    - Last Updated: 15 July 2014 by The Mayor
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -191,146 +193,120 @@ var
   i: integer;
 begin
   // Setup Game Tabs
-  setLength(self.tabs, 14);
-
-  with self.tabs[TAB_ACHIEVEMENTS] do
-  begin
-    _bmp := bitmapFromString(3, 8, 'meJyzvvPN+s439oIetex2IAlEnHwagrKuQAarewqQ5HUIATG8jQREeNmNxDk8ZTg9ZOTTRGXSHSCk/lxJIAIANFkTWA==');
-    _navBarId := NAV_PRIMARY_HERO;
-    _navBarBoxIndex := 4;
-  end;
+  setLength(self.tabs, 19);
 
   with self.tabs[TAB_STATS] do
   begin
     _bmp := bitmapFromString(10, 2, 'meJwLaRQOaRSK7ZTk5eE8ksV4IBGEDiYyAtmC/NzRrVJAlNQtz8/LtSuXYWsqEDECyV05TIIC3AAthhHR');
-    _navBarId := NAV_PRIMARY_HERO;
-    _navBarBoxIndex := 1;
+    _secondaryNavButton := NAV_HERO_STATS;
   end;
 
   with self.tabs[TAB_BACKPACK] do
   begin
     _bmp := bitmapFromString(10, 2, 'meJzjktQQlLJTdu4AIgHJICCbi1lZwsjLJnuiqGIBkAtBSq5ZQARUAyRB6lOqgIoBZmsMmA==');
-    _navBarId := NAV_PRIMARY_HERO;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_HERO_BACKPACK;
   end;
 
   with self.tabs[TAB_EQUIPMENT] do
   begin
     _bmp := bitmapFromString(3, 12, 'meJzrbKrpbKpJTEnuhDG6+ycvXjIbIrJoYmdRRTWQDWQABYFsIMNSVw8oAmQrKagBGRA2BEG4QI1wE4CM+EhvIANoLADLWjI8');
-    _navBarId := NAV_PRIMARY_HERO;
-    _navBarBoxIndex := 3;
+    _secondaryNavButton := NAV_HERO_EQUIPMENT;
   end;
 
   with self.tabs[TAB_QUESTS] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
-    _navBarId := NAV_PRIMARY_ADVENTURES;
-    _navBarBoxIndex := 1;
+    _secondaryNavButton := NAV_ADVENTURE_QUESTS;
   end;
 
   with self.tabs[TAB_ACTIVITIES] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
-    _navBarId := NAV_PRIMARY_ADVENTURES;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_ADVENTURE_ACTIVITIES;
   end;
 
   with self.tabs[TAB_PRAYER] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 1;
+    _secondaryNavButton := NAV_POWER_PRAYER;
   end;
 
   with self.tabs[TAB_FAMILIAR] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJx7dWHxqwuLP15d8fHayudnF947Ovv52UVfPr6EoM8fXjw+NR8oC+L++QtEQBGgyg+oIu+vLAcq+/T+OZAN0fjszIJbB6c/Ojnv47UVH64uf3p6ARABALyyXGE=');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_POWER_FAMILIAR;
   end;
 
   with self.tabs[TAB_MAGIC] do
   begin
     _bmp := bitmapFromString(11, 5, 'meJzbHmmk37bMdtVl24ApmlI8HgrsqY7KHvJO1uGFqRHBbZb8tRVBHG0LODwzgMpEFQuACKiSh2cWK2uRipw6ULGnEadN9sTApgXKWdMEJIOAsoUlF4DK2Jm9IQZCUHBqroSRFyMDg6CUHdB8oBRcFmgLMkqz4QQiOHd7pBEAQGorag==');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 3;
+    _secondaryNavButton := NAV_POWER_MAGIC;
   end;
 
    with self.tabs[TAB_MELEE] do
   begin
     _bmp := bitmapFromString(9, 4, 'meJyz9vJRVxRXlhUSFuPbOWfm318/5h64WpCb6+7mWnjkpVV0iZS44NQZs16+/wAR93B3k5WTUdC10G9bNm/DFrh6oLiSrIiKjICYMBevlHrxiXc53/8Gp4LEZSSFpEU4lSR5AM6bKxQ=');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 4;
+    _secondaryNavButton := NAV_POWER_MELEE;
   end;
 
   with self.tabs[TAB_RANGED] do
   begin
     _bmp := bitmapFromString(2, 8, 'meJyzyFmrpaEpm9CpbBrEbZfNY+HGLxYkoGgAZCuaugFJUUlXYZlcISEDJdscfn4+ABAACfE=');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 5;
+    _secondaryNavButton := NAV_POWER_RANGED;
   end;
 
   with self.tabs[TAB_DEFENSIVE] do
   begin
     _bmp := bitmapFromString(13, 3, 'meJwryM2ta6iqrQgSkAzSVD5aWHJh37kHk2edE5b2EZbyBTIg3AKwMg93N1bWIguXixDxv79+AEkI4+X7D0C9QGVTZ8wCKgOaxsMzCygCUQmUBSKIUUBBAB0HQt0=');
-    _navBarId := NAV_PRIMARY_POWERS;
-    _navBarBoxIndex := 6;
+    _secondaryNavButton := NAV_POWER_DEFENSIVE;
   end;
 
   with self.tabs[TAB_FRIENDS] do
   begin
     _bmp := bitmapFromString(8, 8, 'meJyrm7a6btrqaftuAVF5x0QLjzTWthimrfVwwajKydUrjwK58lZWQCkgA8KFKJi69wazJCd7tHVS52oIgsg6ufiyeOqwFToC2UATQKi4Rs4qCGI4UNy1cgpEPVwQSALFtcIzlGxzrJOageJALlAQgoB2zVm7FaieR9kSaB1EMRABAFrsUf8=');
-    _navBarId := NAV_PRIMARY_SOCIAL;
-    _navBarBoxIndex := 0;
+    _secondaryNavButton := NAV_COMMUNITY_FRIENDS_LIST;
   end;
 
   with self.tabs[TAB_FRIENDS_CHAT] do
   begin
     _bmp := bitmapFromString(6, 8, 'meJwzmnLCaMqJ1Pf/THu3sEiKsbbFWH18b7n5qfXZj/xiQYwMDOzR1tan3gJF9GunM5ubsBU6AtUAZWWqJnNEZQDZTFvrgYJABXAukAQioIhsQidQO4QL0rXyFI+yJUQEqAWIgGYCrQAaCxSEIADzcDIO');
-    _navBarId := NAV_PRIMARY_SOCIAL;
-    _navBarBoxIndex := 1;
+    _secondaryNavButton := NAV_COMMUNITY_FRIENDS_CHAT_LIST;
   end;
 
   with self.tabs[TAB_CLAN_CHAT] do
   begin
     _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
-    _navBarId := NAV_PRIMARY_SOCIAL;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_COMMUNITY_CLAN_CHAT_LIST;
   end;         
 
   with self.tabs[TAB_GROUP] do
   begin
     _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
-    _navBarId := NAV_PRIMARY_SOCIAL;
-    _navBarBoxIndex := 3;
+    _secondaryNavButton := NAV_COMMUNITY_GROUP_CHAT_LIST;
   end;            
 
   with self.tabs[TAB_GRAPHS] do
   begin
     _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
-    _navBarId := NAV_PRIMARY_RUNEMETRICS;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_RUNEMETRICS_GRAPHS;
   end;
 
   with self.tabs[TAB_DROPS] do
   begin
     _bmp := bitmapFromString(7, 9, 'meJyzPvtRv3a6bEIn+9WvQMQzcSdz9STrladS3/+zTmrmiMrgW3cHKMJubmy5+SlQnJGdj9UuGCgCRKzmxkARoBogG6IMJJjWLFM1GcgFmgYXBCKgFUAuBEFsASKgSiAJ5MJFQCbAzIeYBkRAKyD2AhnICADvyUfz');
-    _navBarId := NAV_PRIMARY_RUNEMETRICS;
-    _navBarBoxIndex := 3;
+    _secondaryNavButton := NAV_RUNEMETRICS_DROPS;
   end;
 
   with self.tabs[TAB_NOTES] do
   begin
     _bmp := bitmapFromString(6, 6, 'meJwz0VWyNlaztbPRzFgqb9Aq65AqKi6goiS/+9bj9LlnNQJbTrz+zsbLoWNoAGRA0L9///h4OICCxl5pEC6QjEvPT++YxsjAYOPsufLVT4g4EMAF1xy5BwALKjWC');
-    _navBarId := NAV_PRIMARY_SETTINGS;
-    _navBarBoxIndex := 1;
+    _secondaryNavButton := NAV_SETTINGS_NOTES;
   end;
 
   with self.tabs[TAB_MUSIC] do
   begin
     _bmp := bitmapFromString(6, 8, 'meJyb/+Jb3bTVTi6+LlGpUZWTkzpXT9t3C8gWExOSV7UAknxc/NUrjwJFgCRQCiILVAkk57/4tu81CEUV1wBVAgWBIkAFQAOBsvJWVkA2UJeSghojAwNQDcQEiAhQPZABQfl7nkIYQO0ANDdHLQ==');
-    _navBarId := NAV_PRIMARY_SETTINGS;
-    _navBarBoxIndex := 2;
+    _secondaryNavButton := NAV_SETTINGS_MUSIC;
   end;
 
   for i := 0 to high(self.tabs) do
@@ -354,7 +330,7 @@ Frees all the gametab's bitmaps. Called on script termination.
 .. note::
 
     - by Coh3n
-    - Last Updated: 26 July 2013 by Coh3n
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -616,7 +592,7 @@ of the tab **p** is passed by reference.
 .. note::
 
     - by Coh3n
-    - Last Updated: 26 July 2013 by Coh3n
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -632,7 +608,7 @@ Example:
       end;
     end;
 *)
-function TRSGameTabs._findTab(var p: TPoint; tab: integer; searchBox: TBox): boolean;
+function TRSGameTabs._findTab(var p: TPoint; tab: TGameTab; searchBox: TBox): boolean;
 begin
   if (not self.isSetup) then
     self.__initGameTabs();
@@ -654,7 +630,7 @@ of the tab in **tabBounds**
 .. note::
 
     - by Olly
-    - Last Updated: 21 November 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -667,7 +643,7 @@ Example:
 
     end;
 *)
-function TRSGameTabs.isTabVisible(tab: integer; out tabBounds: TBox): boolean;
+function TRSGameTabs.isTabVisible(tab: TGameTab; out tabBounds: TBox): boolean;
 var
   b: TBoxArray;
   p: TPoint;
@@ -698,7 +674,7 @@ Returns true if the gametab **tab** is the crrently active tab.
 .. note::
 
     - by Olly
-    - Last Updated: 21 November 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -706,7 +682,7 @@ Example:
 
     writeln(gameTabs.isActiveTab(TAB_BACKPACK));
 *)
-function TRSGameTabs.isTabActive(tab: integer): boolean;
+function TRSGameTabs.isTabActive(tab: TGameTab): boolean;
 var
   b: TBox;
   p: TPoint;
@@ -732,7 +708,7 @@ Returns true if the gametab **tab** is open within **timeOut**
 .. note::
 
     - by Olly
-    - Last Updated: 21 November 2013 by Olly
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -740,7 +716,7 @@ Example:
 
     writeln(gameTabs.waitTabActive(TAB_BACKPACK, 1000));
 *)
-function TRSGameTabs.waitTabActive(tab: integer; timeOut: integer): boolean;
+function TRSGameTabs.waitTabActive(tab: TGameTab; timeOut: integer): boolean;
 var
   t: LongWord;
 begin
@@ -769,7 +745,7 @@ Returns true if it successfully open the gametab **tab**
 .. note::
 
     - by Coh3n
-    - Last Updated: 26 July 2013 by Coh3n
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -778,11 +754,11 @@ Example:
     if gameTabs.openTab(TAB_EQUIPMENT) then
       writeLn('The equipment is open!);
 *)
-function TRSGameTabs.openTab(tab: integer): boolean;
+function TRSGameTabs.openTab(tab: TGameTab): boolean;
 var
   b: TBox;
 begin
-  if (not inRange(tab, TAB_ACHIEVEMENTs, TAB_MUSIC)) then // check tab is vaild
+  if (not inRange(Ord(tab), Ord(TAB_STATS), Ord(TAB_MUSIC))) then // check tab is vaild
   begin
     print('TRSGameTabs.openTab('+toStr(tab)+'): The tab isnt valid!, result = ' + toStr(result), TDebug.ERROR);
     exit(false);
@@ -811,7 +787,7 @@ begin
   end;
 
   print('Opening tab via gametab navigation bar');
-  //Navigation.Open(tab);
+  Navigation.Open(self.tabs[tab]._secondaryNavButton);
 
   result := self.waitTabActive(tab, 4000 + random(1000));
 
@@ -831,7 +807,7 @@ Returns the active tab number.
 .. note::
 
     - by Coh3n
-    - Last Updated: 26 July 2013 by Coh3n
+    - Last Updated: 29 January 2022 by StickToTheScript
 
 Example:
 
@@ -840,13 +816,13 @@ Example:
     if (gameTabs.getActiveTab() = TAB_BACKPACK) then
       writeln('The backpack is open');
 *)
-function TRSGameTabs.getActiveTab(): integer;
+function TRSGameTabs.getActiveTab(): TGameTab;
 var
   b: TBox;
-  i: integer;
+  tab: TGameTab;
   p: TPoint;
 begin
-  result := -1;
+  result := TAB_NONE;
   b := self.getActiveTabArea();
 
   if (b.x1 = -1) then
@@ -855,9 +831,9 @@ begin
     exit;
   end;
 
-  for i := 0 to high(self.tabs) do
-    if (self._findTab(p, i, b)) then
-      exit(i);
+  for tab := TAB_STATS to TAB_MUSIC do
+    if (self._findTab(p, tab, b)) then
+      exit(tab);
 
   print('TRSGametabs.getActiveTab(): Didn''t find any bitmap matches', TDebug.WARNING);
 end;

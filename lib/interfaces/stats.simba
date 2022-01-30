@@ -73,7 +73,7 @@ A type that stores the stats tab interface properties.
 *)
 type
   TRSTabStats = record(TRSInterface)
-    tabIndex: integer;
+    tabIndex: TGameTab;
   end;
 
 (*
