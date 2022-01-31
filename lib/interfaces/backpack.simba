@@ -56,7 +56,7 @@ A type that stores the backpack gametab interface properties.
 *)
 type
   TRSTabBackpack = record(TRSInterface)
-    tabIndex: integer;
+    tabIndex: TGameTab;
     {$IFNDEF CODEINSIGHT}
     __slots: array [0..1] of TBoxArray;
     {$ENDIF}
@@ -382,7 +382,7 @@ Example:
 *)
 function TRSTabBackpack.getSlotBoxes(): TBoxArray;
 begin
-  result := self.LoadSlotBoxes(self.getbounds(), 'Includes\SRL-RS3\lib\interfaces\slots.txt');
+  result := self.LoadSlotBoxes(GameTabs.GetTabArea(), 'Includes\SRL-RS3\lib\interfaces\slots.txt');
 end;
 
 (*
