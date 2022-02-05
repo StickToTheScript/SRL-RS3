@@ -20,9 +20,6 @@ Below is a list of broken interface functions:
 - Action Bar
   - clear
   - getAbilityCooldown (Partially functional)
-- Backpack
-  - TRSTabBackpack.getMoneyPouchAmount
-  - TRSTabBackpack.isLocked
 - Bankscreen
   - All Functions
 - Chatbox

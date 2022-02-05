@@ -1233,7 +1233,7 @@ Returns true if the backpack is locked (i.e. directly after closing the bank)
 .. note::
 
     - by Olly
-    - Last Updated: 4th February 2015 by The Mayor
+    - Last Updated: 5th February 2022 by StickToTheScript
 
 Example:
 
@@ -1245,16 +1245,21 @@ Example:
 *)
 function TRSTabBackpack.isLocked(): boolean;
 var
-  b: TBox := self.getBounds();
+  claspBitmap: Integer;
 begin
-  b.edit(168, 8, -10, -282);
+  claspBitmap := BitmapFromString(24, 8, 'meJxjYMAJJnaUrls1c9/OTUAEZAC' +
+        '5uNViB0BdQLR4bkdPY2ZTRQIQARlALkSceEOAVpdkBmBFEEcSNARo' +
+        'KdB2oPqcJO+YEMcAT3MfNxACMoBcoCBQCqgAqAyPITMmgwwBKk6Oc' +
+        'sWlBigFVABUBlSMVQHQImAg4DcE2SigYqAWTFm4d/AbAgHpsR4QD2' +
+        'I1hxjHIDsJ2RwAazZeeA==');
 
-  for 0 to 1 do
+  if FindBitmapToleranceIn(claspBitmap, x, y, Mainscreen.getBounds(), 1) then
   begin
-    if (pos('ble', TesseractOCR.Recognize(b, 50)) > 0) then
-      exit(true);
-    b.edit(0, 27, 0, 27);
-  end;
+    result := True;
+  end else
+    result := False;
+
+  FreeBitmap(claspBitmap);
 
 end;
 
