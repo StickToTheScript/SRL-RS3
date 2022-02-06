@@ -48,6 +48,8 @@ A type that stores the chatBox interface properties.
 type
   TRSChatBox = record(TRSInterface)
     lineBoxes: TBoxArray;
+    wikiBitmap: Integer;
+    isSetup: Boolean;
   end;
 
 (*
@@ -91,7 +93,7 @@ Initializes the TRSChatBox.
 .. note::
 
     - by Coh3n
-    - Last Updated: 08 August 2013 by Coh3n
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -108,58 +110,86 @@ begin
     ID := ID_INTERFACE_CHAT_BOX;
     parentID := -1;
     isStatic := false;
+    isSetup := false;
+    wikiBitmap := BitmapFromString(17, 9, 'meJw7e3D52YPLHQ0FXYyFgORZGNfZSKg41R3I3rNxhq+tHLLs0V0LgchMS8DOQAhIwrlBrlr7t845sHWuu62mhTaK7P7Ns4HIQJXXSkcASEK4plqiK+e37ds8K8jTQkeRx1yTH1l214YZQATXAuF2N6YDyewkPy15blMNkHpk2c2rJgIRXAuEu2nFhE0r+s10JY3V+Sy1BeBaILIblvduWNoL1wLiLu+NC3MDCk7tLrTUEYKoh8ouBcmuWtQJRHAtEK6cOEdrVSKQUZkXYYFkC0R2yZwmIIJrgXA15Lh1VYRnTSwHshNCrCBug8sumFE3b2oNMFhMNfiAJJANRFoK3NoK3NYmynOnVM+ZXOVhqwKXBaoHAO7XsRg=');
+
+    addOnTerminate('__freeChatbox');
   end;
 end;
 {$ENDIF}
 
 {*
-__setup
--------
+__freeChatbox
+-------------
 
 .. code-block:: pascal
 
-    procedure TRSChatBox.__setup();
+    procedure __freeChatbox();
 
-Sets up the chatBox variables based on its size.
+Frees all the chatbox's bitmaps. Called on script termination.
 
 .. note::
 
-    - by Olly
-    - Last Updated: 1 August 2015 by The Mayor
+    - by StickToTheScript
 
 Example:
 
 .. code-block:: pascal
 
-    chatBox.__setup();
+    addOnTerminate('__freeChatbox');
 *}
 {$IFNDEF CODEINSIGHT}
-procedure TRSChatBox.__setup();
+procedure __freeChatbox();
 var
-  b, chatBounds, tabArea: TBox;
-  wid, hei, i: integer;
-  p: TPoint;
+  i: integer;
 begin
-  setLength(self.lineBoxes, 0);
-  getClientDimensions(wid, hei);
+  print('Freeing chatbox bitmaps...');
 
-  tabArea := GameTabs.GetTabArea();
-
-  self.setBounds([1, actionBar.y2, tabArea.x1, hei-2]);
-  chatBounds := chatBox.getChatArea();
-
-  for i := 0 to 10 do
-  begin
-    p.y := 568 - (i * 14);
-    b := [chatBounds.x1, p.y - 7, chatBounds.x2, p.y + 7];
-
-    if (b.y1 < chatBox.getChatArea().y1) then
-      break();
-
-    insert(b, self.lineBoxes, high(self.lineBoxes)+1);
-  end;
+  freeBitmap(Chatbox.wikiBitmap);
 end;
 {$ENDIF}
+{$f+}
+
+(*
+GetTabSelectionArea
+-------------------
+
+.. code-block:: pascal
+
+    function TRSGameTabs.GetTabSelectionArea(): TBox;
+
+Returns the TBox of the tab selection area. It will return [-1, -1, -1, -1] if
+one or no tabs are active.
+
+.. note::
+
+    - by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    var
+      b: TBox;
+    begin
+      b := gameTabs.GetTabSelectionArea()
+
+    end;
+*)
+function TRSChatBox.GetChatSelectionArea(): TBox;
+var
+  searchBounds: TBox;
+  p1, p2: TPoint;
+  msMiddleX, wid, hei: Integer;
+begin
+  result := [-1, -1, -1, -1];
+                         
+  getClientDimensions(wid, hei);
+  searchBounds := [0, 0, wid - 1, hei - 1];
+  msMiddleX := Round((searchBounds.X2 - searchBounds.X1) / 2);
+  if findBitmapToleranceIn(GameTabs.tabSelectionBitmapStart, p1.x, p1.y, [searchBounds.X1, searchBounds.Y1, msMiddleX, searchBounds.Y2], 30) and findBitmapToleranceIn(GameTabs.tabSelectionBitmapEnd, p2.x, p2.y, [p1.x, p1.y - 17, msMiddleX, p1.y + 12], 30) then
+    result := [p1.x, p1.y - 17, p2.x + 3, p2.y + 26];
+end;
 
 (*
 getChatArea
@@ -174,7 +204,7 @@ Returns a TBox of the area where the chat text is located.
 .. note::
 
     - by Olly
-    - Last Updated: 17 October 2013 by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -187,9 +217,81 @@ Example:
     end;
 *)
 function TRSChatBox.getChatArea(): TBox;
+var
+  msBounds, tabSelectArea: TBox;
+  p1, p2, msMiddle: TPoint;
+  wid, hei: Integer;
 begin
-  result := intToBox(self.x1+3, self.y1 + 68, self.x2-20, self.y2-22);
+  result := [-1, -1, -1, -1];
+
+  getClientDimensions(wid, hei);
+  msBounds := [0, 0, wid - 1, hei - 1];
+  msMiddle := [Round((msBounds.X2 - msBounds.X1) / 2), Round((msBounds.Y2 - msBounds.Y1) / 2)];
+  tabSelectArea := GetChatSelectionArea();
+
+  if (tabSelectArea <> [-1, -1, -1, -1]) then
+  begin
+    if findBitmapToleranceIn(self.wikiBitmap, p1.x, p1.y, [tabSelectArea.X1, tabSelectArea.Y2, tabSelectArea.X2 + 15, msBounds.Y2], 30) then
+      result := [tabSelectArea.X1, tabSelectArea.Y2, p1.x + 25, p1.y + 18];
+  end else
+  begin
+    if findBitmapToleranceIn(GameTabs.tabBitmapTopLeft, p1.x, p1.y, [msBounds.X1, msMiddle.Y, msMiddle.X, msBounds.Y2], 78) and findBitmapToleranceIn(self.wikiBitmap, p2.x, p2.y, [p1.X, p1.Y, msMiddle.X, msBounds.Y2], 30) then
+      result := [p1.X + 2, p1.y + 12, p2.X + 24, p2.y + 17];
+  end;
 end;
+
+{*
+__setup
+-------
+
+.. code-block:: pascal
+
+    procedure TRSChatBox.__setup();
+
+Sets up the chatBox variables based on its size.
+
+.. note::
+
+    - by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
+
+Example:
+
+.. code-block:: pascal
+
+    chatBox.__setup();
+*}            
+
+{$IFNDEF CODEINSIGHT}
+procedure TRSChatBox.__setup();
+const
+  NAME_LINE_SIZE = 25;
+  SCROLL_BOX_LINE_SIZE = 18;
+  NAME_LINE_OFFSET = 11;
+var
+  b, chatBounds: TBox;
+  i: integer;
+  p: TPoint;
+begin
+  setLength(self.lineBoxes, 0);
+
+  self.setBounds(chatBox.getChatArea());
+
+
+  b := [self.X1, self.Y2 - NAME_LINE_SIZE, self.X2, self.Y2];
+  b := [self.X1, self.Y2 - NAME_LINE_SIZE, self.X2, self.Y2];
+
+  for i:=0 to 10 do
+  begin
+    b := [self.X1, self.Y2 - NAME_LINE_SIZE - NAME_LINE_OFFSET - (SCROLL_BOX_LINE_SIZE * (i + 1)), self.X2, self.Y2 - NAME_LINE_OFFSET - NAME_LINE_SIZE - (SCROLL_BOX_LINE_SIZE * i)];
+    if (b.X1 < self.X1) then
+      break;
+
+    insert(b, self.lineBoxes, high(self.lineBoxes)+1);
+  end;
+  self.isSetup := true;
+end;
+{$ENDIF}
 
 (*
 findText
@@ -205,7 +307,7 @@ The scripter has the option of using a custom TTesseractFilter **Filter** .
 .. note::
 
     - by Olly
-    - Last Updated: 17 October 2013 by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -217,9 +319,20 @@ Example:
 function TRSChatBox.findText(txt: TStringArray; const threshold : Integer = TESS_THRESHOLD_CHATBOX): boolean;
 var
   s: string;
-begin
+  i: Integer;
+begin 
+  if (not self.isSetup) then
+    self.__setup();
+
   s := TesseractOCR.Recognize(Self.getChatArea(), threshold);
-  if (length(s) > 1) then result := IsArrInStr(txt, s);
+  if (length(s) > 1) then
+  begin
+    for i:=0 to High(txt) do
+    begin
+      if (pos(txt[i], s) > 0) then
+        Exit(true);
+    end;
+  end;
 end;
 
 (*
@@ -237,7 +350,7 @@ chatBox is line 0.
 .. note::
 
     - by Olly
-    - Last Updated: 17 October 2013 by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -246,7 +359,10 @@ Example:
     writeLn(chatBox.getTextOnLine(0));
 *)
 function TRSChatBox.getTextOnLine(Line: Integer; const threshold : Integer = TESS_THRESHOLD_CHATBOX): String;
-begin
+begin   
+  if (not self.isSetup) then
+    self.__setup();
+
   if (not inRange(Line, Low(Self.lineBoxes), High(Self.lineBoxes))) then
     Exit(Print('TRSChatBox.getTextOnLine(): Invaild line', False));
 
@@ -269,7 +385,7 @@ lines **lines** .The scripter has the option of using a custom TTesseractFilter
 .. note::
 
     - by Olly
-    - Last Updated: 17 October 2013 by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -283,6 +399,9 @@ var
   i: integer;
   s: string;
 begin
+  if (not self.isSetup) then
+    self.__setup();
+
   result := false;
 
   for i := 0 to high(lines) do
@@ -295,70 +414,73 @@ begin
     end;
   end;
 end;
-
-(*
-getXPBar
---------
-
-.. code-block:: pascal
-
-    function TRSChatBox.getXPBar(): Integer;
-
-Returns the XP from the XP bar when it is placed in the top right corner of
-the chatBox.
-
-.. note::
-
-    - by Ashaman88
-    - Last Updated: Some time in 2014 by Olly
-
-Example:
-
-.. code-block:: pascal
-
-    var
-      xpGain: Integer;
-    begin
-      xpGain := chatBox.getXPBar() - StartXP;
-    end;
-*)
-function TRSChatBox.getXPBar(): Integer;
-const
-  threshold: Integer = 30;
-var
-  b: TBox;
-  i, p: Integer;
-  TPA, TextPoints: TPointArray;
-  ATPA: T2DPointArray;
-  s: String;
-begin
-  Result := 0;
-
-  if (not FindColorsTolerance(TPA, 13158856, IntToBox(Self.X2 - 220, Self.Y1 + 16, Self.X2 - 5, Self.Y1 + 38), 30, ColorSetting(2, 4.17, 0.23))) then
-  begin
-    Print('TRSChatBox.getXP(): Failed to find text to read', TDebug.ERROR);
-    Exit();
-  end;
-
-  ATPA := ClusterTPAEx(TPA, 1, 1);
-  for i := 0 to High(ATPA) do
-  begin
-    b := GetTPABounds(ATPA[i]);
-    if (inRange(b.getWidth(), 2, 7)) and (inRange(b.getHeight(), 5, 9)) then
-      Insert(ATPA[i], TextPoints);
-  end;
-
-  b := GetTPABounds(TextPoints);
-  if (b.getWidth() < 3) or (b.getHeight() < 3) then
-    Exit();
-
-  s := TesseractOCR.Recognize(IntToBox(b.X1 - 2, b.Y1 - 5, b.X2 + 2, b.Y2 + 5), threshold);
-  p := Pos('xp', s);
-  if (p > 0) then
-    s := Copy(s, p + 2, Length(s) - (p + 1));
-
-  Result := StrToIntDef(ExtractFromStr(s, Numbers), 0);
-end;
+//
+//(*
+//getXPBar
+//--------
+//
+//.. code-block:: pascal
+//
+//    function TRSChatBox.getXPBar(): Integer;
+//
+//Returns the XP from the XP bar when it is placed in the top right corner of
+//the chatBox.
+//
+//.. note::
+//
+//    - by Ashaman88
+//    - Last Updated: Some time in 2014 by Olly
+//
+//Example:
+//
+//.. code-block:: pascal
+//
+//    var
+//      xpGain: Integer;
+//    begin
+//      xpGain := chatBox.getXPBar() - StartXP;
+//    end;
+//*)
+//function TRSChatBox.getXPBar(): Integer;
+//const
+//  threshold: Integer = 30;
+//var
+//  b: TBox;
+//  i, p: Integer;
+//  TPA, TextPoints: TPointArray;
+//  ATPA: T2DPointArray;
+//  s: String;
+//begin
+//  if (not self.isSetup) then
+//    self.__setup();
+//
+//  Result := 0;
+//
+//  if (not FindColorsTolerance(TPA, 13158856, IntToBox(Self.X2 - 220, Self.Y1 + 16, Self.X2 - 5, Self.Y1 + 38), 30, ColorSetting(2, 4.17, 0.23))) then
+//  begin
+//    Print('TRSChatBox.getXP(): Failed to find text to read', TDebug.ERROR);
+//    Exit();
+//  end;
+//
+//  ATPA := ClusterTPAEx(TPA, 1, 1);
+//  for i := 0 to High(ATPA) do
+//  begin
+//    b := GetTPABounds(ATPA[i]);
+//    if (inRange(b.getWidth(), 2, 7)) and (inRange(b.getHeight(), 5, 9)) then
+//      Insert(ATPA[i], TextPoints);
+//  end;
+//
+//  b := GetTPABounds(TextPoints);
+//  if (b.getWidth() < 3) or (b.getHeight() < 3) then
+//    Exit();
+//
+//  s := TesseractOCR.Recognize(IntToBox(b.X1 - 2, b.Y1 - 5, b.X2 + 2, b.Y2 + 5), threshold);
+//  p := Pos('xp', s);
+//  if (p > 0) then
+//    s := Copy(s, p + 2, Length(s) - (p + 1));
+//
+//  Result := StrToIntDef(ExtractFromStr(s, Numbers), 0);
+//end;
 
 (*
 enterAmount
@@ -374,7 +496,7 @@ keep trying until successful of **waitTime** is reached.
 .. note::
 
     - by Thomas
-    - Last Updated: 11 December by Thomas
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -387,6 +509,9 @@ var
   t: TCountDown;
   BACKGROUND_COLOR: TColorData := [9086905, 65];
 begin
+  if (not self.isSetup) then
+    self.__setup();
+
   t.setTime(waitTime);
 
   result := BACKGROUND_COLOR.waitCount(self.getBounds(), waitTime, 10000);
@@ -413,7 +538,7 @@ to search for can be found at the top of the chatbox.simba file.
 .. note::
 
     - by Thomas
-    - Last Updated: 11 December by Thomas
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -427,7 +552,10 @@ function TRSChatBox.findTextBoxes(search: integer): TBoxArray;
 var
   TPA: TPointArray;
   ATPA: T2DPointArray;
-begin
+begin   
+  if (not self.isSetup) then
+    self.__setup();
+
   case search of
     CHATBOX_CHALLENGES: FindColorsTolerance(TPA, 470116, chatBox.getChatArea(), 31);
     CHATBOX_TRADES: FindColorsTolerance(TPA, 11953617, chatBox.getChatArea(), 66);
@@ -446,5 +574,3 @@ end;
 begin
   chatBox.__init();
 end;
-
-{$f+}
