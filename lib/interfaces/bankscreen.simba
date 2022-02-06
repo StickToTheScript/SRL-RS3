@@ -26,48 +26,51 @@ Internal bankscreen constants.
 
 *}
 const
-  _BANK_SLOTS_OFFSET: TPoint = [41, 108];
-  _PACK_SLOTS_OFFSET: TPoint = [516, 94];
-  _TAB_OFFSET: TPoint = [34, 66];
+  _BANK_SLOTS_OFFSET: TPoint = [41, 64];
+  _PACK_SLOTS_OFFSET: TPoint = [518, 48];
+  _SEARCH_BUTTON_OFFSET: TBox = [35, -35, 180, -10];
+  _PLACEHOLDER_BUTTON_OFFSET: TBox = [-210, -41, -181, -12];
+  _NOTES_BUTTON_OFFSET: TBox = [-175, -41, -146, -12];
+  _PIN_BUTTON_OFFSET: TBox = [-54, -40, -26, -13];
+  _TAB_OFFSET: TPoint = [58, 19];
   BANK_SLOT_LOW = 1;
   BANK_SLOT_HIGH = 28;
 
 (*
-**const Deposit Buttons**
+**type Deposit Buttons**
 
 Constants that represent the the quick deposit buttons.
 
-    * QUICK_DEPOSIT_INVENTORY
-    * QUICK_DEPOSIT_EQIUPMENT
-    * QUICK_DEPOSIT_BOB
-    * QUICK_DEPOSIT_MONEY_POUCH
+    * BANK_BUTTON_DEPOSIT_INVENTORY
+    * BANK_BUTTON_DEPOSIT_EQUIPMENT
+    * BANK_BUTTON_DEPOSIT_BOB
+    * BANK_BUTTON_DEPOSIT_MONEY_POUCH
 
 *)
-const
-  QUICK_DEPOSIT_INVENTORY   = 0;
-  QUICK_DEPOSIT_EQIUPMENT   = 1;
-  QUICK_DEPOSIT_BOB         = 2;
-  QUICK_DEPOSIT_MONEY_POUCH = 3;
+type
+  TRSBankDepositOptions = (
+    BANK_BUTTON_DEPOSIT_INVENTORY,
+    BANK_BUTTON_DEPOSIT_EQUIPMENT,
+    BANK_BUTTON_DEPOSIT_BOB,
+    BANK_BUTTON_DEPOSIT_MONEY_POUCH
+  );
 
 (*
-**const Bank Buttons**
+**type Bank Buttons**
 
 Constants that represent the bank buttons.
 
-    * BANK_BUTTON_PIN
-    * BANK_BUTTON_PRESET_SETUP
-    * BANK_BUTTON_PRESET_1
-    * BANK_BUTTON_PRESET_2
+    * BANK_BUTTON_SEARCH
     * BANK_BUTTON_NOTE
+    * BANK_BUTTON_PLACEHOLDER
 
 *)
-const
-  BANK_BUTTON_SEARCH = 0;
-  BANK_BUTTON_PIN = 1;
-  BANK_BUTTON_PRESET_SETUP = 2;
-  BANK_BUTTON_PRESET_1 = 3;
-  BANK_BUTTON_PRESET_2 = 4;
-  BANK_BUTTON_NOTE = 5;
+type
+  TRSBankGenericButton = (
+    BANK_BUTTON_SEARCH,
+    BANK_BUTTON_NOTE,
+    BANK_BUTTON_PLACEHOLDER
+  );
 
 (*
 **const Withdraw Options**
@@ -280,7 +283,7 @@ Scripters should use bankScreen.isOpen() below.
 .. note::
 
     - by The Mayor
-    - Last Updated: 18 March 2015 by The Mayor
+    - Last Updated: 5 February 2022 by StickToTheScript
 
 Example:
 
@@ -298,8 +301,8 @@ var
   b: TBox;
 begin
   getClientDimensions(w, h);
-                          // Black box around "BANK OF RUNESCAPE"
-  if findColors(TPA, 65536, 0, 0, w-1, 50) then
+                          // Black box around "BANK OF GIELINOR"
+  if findColors(TPA, 65536, 0, 0, w-1, round(h / 2)) then
   begin
     ATPA := TPA.cluster(5);
     ATPA.sortBySize(true);
@@ -308,17 +311,17 @@ begin
     begin
       b := ATPA[i].getBounds();
 
-      if (b.getWidth() = 479) and (b.getHeight() = 31) then
+      if (b.getWidth() = 698) and (b.getHeight() = 31) then
       begin
-        b.offset(point(0, 554)); // Offset to buttons at bottom
+        b.offset(point(0, 600)); // Offset to buttons at bottom
 
-        if findColors(TPA, 4578368, b) then // Green arrow colour
+        if findColors(TPA, 5091030, b) then // Yellow search icon colour
         begin
           ATPA2 := TPA.cluster(5);
 
-          if length(ATPA2) = 6 then // 6 green arrows
+          if length(ATPA2) = 1 then // 1 search icon
           begin
-            b.edit(-8, -562, 200, 7);
+            b.edit(-8, -566, 8, 7);
             self.setBounds(b);
             result := true;
             break();
@@ -398,7 +401,7 @@ by default, but the **escape** parameter can be set to false to close via the mo
 .. note::
 
     - by Olly
-    - Last Updated: 19 March 2014 by Coh3n
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -428,7 +431,7 @@ begin
   end;
 
   // click the X as a failsafe
-  mouseBox(intToBox(self.x1 + 465, self.y1 + 15, self.x2 - 207, self.y1 + 30), MOUSE_MOVE);
+  mouseBox(intToBox(self.x2 - 30, self.y1 - 27, self.x2 - 15, self.y1 - 12), MOUSE_MOVE);
 
   // this is a failsafe in case the bankscreen closes (from the ESC key) while moving the mouse
   if self.isOpen() then
@@ -467,7 +470,7 @@ Returns true if the deposit button **depositType** is a valid button.
 .. note::
 
     - by Olly
-    - Last Updated: 20 October 2013 by Olly
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -476,15 +479,15 @@ Example:
     if (bankscreen.__isDepositButtonVaild(DEPOSIT_BUTTON_DEPOSIT_ALL)) then
       writeln('It''s valid!');
 *}
-function TRSBankScreen._isDepositButtonVaild(depositType: integer): boolean;
+function TRSBankScreen._isDepositButtonVaild(depositType: TRSBankDepositOptions): boolean;
 const
-  DEPOSIT_BUTTON_LOW = 0;
-  DEPOSIT_BUTTON_HIGH = 3;
+  DEPOSIT_BUTTON_LOW = Ord(BANK_BUTTON_DEPOSIT_INVENTORY);
+  DEPOSIT_BUTTON_HIGH = Ord(BANK_BUTTON_DEPOSIT_MONEY_POUCH);
 begin
-  result := inRange(depositType, DEPOSIT_BUTTON_LOW, DEPOSIT_BUTTON_HIGH);
+  result := inRange(Ord(depositType), DEPOSIT_BUTTON_LOW, DEPOSIT_BUTTON_HIGH);
 
   if (not result) then
-    print('bankScreen._isDepositButtonVaild(): Button "' + intToStr(depositType) + '" is invaild', TDebug.WARNING);
+    print('bankScreen._isDepositButtonVaild(): Button "' + ToStr(depositType) + '" is invaild', TDebug.WARNING);
 end;
 
 {*
@@ -608,7 +611,7 @@ Returns a TBoxArray of all of the backpack slots in the bank interface.
 .. note::
 
     - by Olly
-    - Last Updated: 15 July 2014 by The Mayor
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -626,7 +629,7 @@ begin
   if (not self.isOpen()) then
     exit();
 
-  result := grid(4, 7, 35, 31, 46, 36, point(self.x + _PACK_SLOTS_OFFSET.x, self.y + _PACK_SLOTS_OFFSET.y));
+  result := grid(4, 7, 35, 31, 50, 36, point(self.x + _PACK_SLOTS_OFFSET.x, self.y + _PACK_SLOTS_OFFSET.y));
 end;
 
 (*
@@ -948,7 +951,7 @@ start on the left at 1 and count across.
 .. note::
 
     - by Coh3n
-    - Last Updated: 10 August 2013 by Coh3n
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -970,7 +973,7 @@ begin
   end;
 
   // - 1 because the grid (array) starts at 0.
-  result := gridBox(tab -1, 9, 1, 45, 35, 46, 0, point(self.x + _TAB_OFFSET.x, self.y + _TAB_OFFSET.y));
+  result := gridBox(tab -1, 9, 1, 40, 35, 48, 0, point(self.x + _TAB_OFFSET.x, self.y + _TAB_OFFSET.y));
 end;
 
 {*
@@ -1186,24 +1189,22 @@ constants are located at the top of this page.
 .. note::
 
     - by Olly
-    - Last Updated: 29 June 2015 by Turpinator
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
 .. code-block:: pascal
 
     if bankScreen.isOpen(5000) then
-      bankScreen.quickDeposit(QUICK_DEPOSIT_INVENTORY);
+      bankScreen.quickDeposit(BANK_BUTTON_DEPOSIT_INVENTORY);
 *)
-function TRSBankScreen.quickDeposit(depositType: integer): boolean;
+function TRSBankScreen.quickDeposit(depositType: TRSBankDepositOptions): boolean;
 const
-  DEPOSIT_BUTTON_OFFSET: TPoint = [-320, -24];
+  DEPOSIT_BUTTON_OFFSET: TPoint = [-197, -263];
 var
   b: TBox;
   tba: TBoxArray;
 begin
-  result := true;
-
   if (not self._isDepositButtonVaild(depositType)) then
     exit(false);
 
@@ -1213,14 +1214,15 @@ begin
     exit(false);
   end;
 
-  b := gridBox(depositType, 4, 1, 29, 25, 34, 0,
+  b := gridBox(Ord(depositType), 4, 1, 29, 29, 39, 0,
                point(self.x2 + DEPOSIT_BUTTON_OFFSET.x,
                      self.y2 + DEPOSIT_BUTTON_OFFSET.y));
 
   mouseBox(b, MOUSE_LEFT);
-  wait(200 + random(300));
+  wait(200 + random(300));    
+  result := true;
 
-  print('bankScreen.quickDeposit(): Clicked quick deposit id ' + intToStr(depositType), TDebug.SUB);
+  print('bankScreen.quickDeposit(): Clicked quick deposit id ' + ToStr(depositType), TDebug.SUB);
 end;
 
 (*
@@ -1238,21 +1240,20 @@ the mouse. Vaild button constants are located at the top of this page.
 .. note::
 
     - by Olly
-    - Last Updated: 29 June 2015 by Turpinator
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
 .. code-block:: pascal
 
     if bankScreen.isOpen(5000) then
-      bankScreen.clickButton(BANK_BUTTON_PRESET_1);
+      bankScreen.clickButton(BANK_BUTTON_NOTE);
 *)
-function TRSBankScreen.clickButton(button: integer; useKey: boolean = true): boolean;
-const
-  BUTTON_OFFSET: TPoint = [-661, -24];
+function TRSBankScreen.clickButton(button: TRSBankGenericButton; useKey: boolean = true): boolean;
 var
   b: TBox;
   timeOut: LongWord;
+  key: string;
 begin
   if (not self.isOpen()) then
   begin
@@ -1260,19 +1261,28 @@ begin
     exit(false);
   end;
 
-  b := gridBox(button, 6, 1, 29, 25, 34, 0,
-               point(self.x2 + BUTTON_OFFSET.x,
-                     self.y2 + BUTTON_OFFSET.y));
-
-  // try ESC key first
-  if useKey and ((button = BANK_BUTTON_PRESET_1) or (button = BANK_BUTTON_PRESET_2)) then
+  if useKey then
   begin
-    timeOut := (getSystemTime() + randomRange(1500, 2000));
-    repeat
-      multiType(toStr(button - 2), randomRange(30, 50), 2, false);
-      wait(100 + random(50));
-     if (not self.isOpen()) then exit(true);
-    until((getSystemTime() > timeOut) or result);
+    case button of
+      BANK_BUTTON_SEARCH: key := 's';
+      BANK_BUTTON_NOTE: key := 'n';
+      BANK_BUTTON_PLACEHOLDER: key := 'p';
+    end;
+
+    multiType(key, randomRange(30, 50), 2, false);
+    wait(100 + random(50));
+    Exit(true);
+  end;
+
+  case button of
+    BANK_BUTTON_SEARCH:
+      b := [self.x1 + _SEARCH_BUTTON_OFFSET.X1, self.y2 + _SEARCH_BUTTON_OFFSET.Y1, self.X1 + _SEARCH_BUTTON_OFFSET.X2, self.Y2 + _SEARCH_BUTTON_OFFSET.Y2];
+
+    BANK_BUTTON_NOTE:
+      b := [self.x2 + _NOTES_BUTTON_OFFSET.X1, self.y2 + _NOTES_BUTTON_OFFSET.Y1, self.X2 + _NOTES_BUTTON_OFFSET.X2, self.Y2 + _NOTES_BUTTON_OFFSET.Y2];
+
+    BANK_BUTTON_PLACEHOLDER:
+      b := [self.x2 + _PLACEHOLDER_BUTTON_OFFSET.X1, self.y2 + _PLACEHOLDER_BUTTON_OFFSET.Y1, self.X2 + _PLACEHOLDER_BUTTON_OFFSET.X2, self.Y2 + _PLACEHOLDER_BUTTON_OFFSET.Y2];
   end;
 
   mouseBox(b, MOUSE_MOVE);
@@ -1380,7 +1390,7 @@ all items, or specific slots and amounts. It can also deposit each item one by o
 .. note::
 
     - by Coh3n
-    - Last Updated: 24 May 2015 by The Mayor
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Examples:
 
@@ -1443,13 +1453,11 @@ begin
 
       if (amounts[i] = -1) then
       begin
-        writeLn(slots);
-        writeLn(amounts);
-        if (not chooseOption.select(['Deposit-All', 'sit-All', 'All'], 300)) then
-          chooseOption.select(['Deposit', 'osit']); // In case there's only one
+        if (not chooseOption.select(['Deposit-All', 'sit-All', 'All'], MOUSE_LEFT, 300, true)) then
+          chooseOption.select(['Deposit', 'osit'], 250, true); // In case there's only one
       end else
-        if (not chooseOption.select([toStr(amounts[i])], MOUSE_LEFT, 300)) then
-          if chooseOption.select(['Deposit-X', '-X']) then
+        if (not chooseOption.select([toStr(amounts[i])], MOUSE_LEFT, 300, true)) then
+          if chooseOption.select(['Deposit-X', '-X'], 250, true) then
             chatBox.enterAmount(amounts[i], random(5000, 6000));
     end;
 
@@ -2012,7 +2020,7 @@ consants are:
 .. note::
 
     - by Serajin
-    - Last Updated: 29 June 2015 by Turpinator
+    - Last Updated: 6 February 2022 by StickToTheScript
 
 Example:
 
@@ -2020,12 +2028,12 @@ Example:
 
     bankScreen.isButtonActive(BANK_BUTTON_NOTE);
 *)
-function TRSBankScreen.isButtonActive(button: integer): boolean;
-const
-  BUTTON_OFFSET: TPoint = [-661, -24];
+function TRSBankScreen.isButtonActive(button: TRSBankGenericButton): boolean;
 var
   b: TBox;
   timeOut: LongWord;
+  x, y: Integer;
+  s: string;
 begin
   if (not self.isOpen()) then
   begin
@@ -2033,11 +2041,26 @@ begin
     exit(false);
   end;
 
-  b := gridBox(button, 6, 1, 29, 25, 34, 0,
-               point(self.x2 + BUTTON_OFFSET.x,
-                     self.y2 + BUTTON_OFFSET.y));
+  case button of
+    BANK_BUTTON_SEARCH:
+    begin
+      b := [self.x1 + _SEARCH_BUTTON_OFFSET.X1, self.y2 + _SEARCH_BUTTON_OFFSET.Y1, self.X1 + _SEARCH_BUTTON_OFFSET.X2, self.Y2 + _SEARCH_BUTTON_OFFSET.Y2];
+      s := TesseractOCR.Recognize(b, 10);
+      if (pos("Search", s) <> 1) then result := true;
+    end;
 
-  result:= (countColorTolerance(5133403, b, 84) > 450);
+    BANK_BUTTON_NOTE:
+    begin
+      b := [self.x2 + _NOTES_BUTTON_OFFSET.X1, self.y2 + _NOTES_BUTTON_OFFSET.Y1, self.X2 + _NOTES_BUTTON_OFFSET.X2, self.Y2 + _NOTES_BUTTON_OFFSET.Y2];
+      result:= FindColorTolerance(x, y, 7251102, b, 12);
+    end;
+
+    BANK_BUTTON_PLACEHOLDER:
+    begin
+      b := [self.x2 + _PLACEHOLDER_BUTTON_OFFSET.X1, self.y2 + _PLACEHOLDER_BUTTON_OFFSET.Y1, self.X2 + _PLACEHOLDER_BUTTON_OFFSET.X2, self.Y2 + _PLACEHOLDER_BUTTON_OFFSET.Y2];
+      result:= FindColorTolerance(x, y, 7251102, b, 12);
+    end;
+  end;
 end;
 
 (*
